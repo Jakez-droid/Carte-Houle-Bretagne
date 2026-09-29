@@ -2,7 +2,7 @@
 (function(){
 "use strict";
 
-var VERSION="3.0.2";
+var VERSION="3.1.0";
 var S=null, ZONES=[], COAST=[], G=null;          // spots, zones, trait de côte, grille calculée
 var fetchedAt=null, partial=0, offline=false;
 var ti=0, sel=null, minStars=0, favOnly=false, tab="map", query="", sortBy="score";
@@ -73,6 +73,48 @@ function arrowGlyph(deg,col,size){
   size=size||13;
   return '<svg viewBox="0 0 20 20" width="'+size+'" height="'+size+'" aria-hidden="true" style="vertical-align:-2px"><g transform="rotate('+((deg+180)%360)+' 10 10)"><path d="M10 3 L10 17 M10 17 L6.5 12.5 M10 17 L13.5 12.5" fill="none" stroke="'+(col||"currentColor")+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g></svg>';
 }
+
+
+// ---------- aide : bulles sur les métriques, page « comment ça marche » ----------
+function tipBtn(key){
+  var T=(root_HELP()||{}).TIPS||{};
+  if(!T[key])return "";
+  return '<button class="tipbtn" type="button" data-tip="'+key+'" aria-label="Explication : '+T[key].t+'">?</button>';
+}
+function root_HELP(){return window.HELP;}
+function openTip(key){
+  var T=(root_HELP()||{}).TIPS||{},x=T[key];
+  if(!x)return;
+  showModal('<h3>'+x.t+'</h3><p>'+x.d+'</p>');
+}
+function openGuide(){
+  var G=(root_HELP()||{}).GUIDE||[];
+  var h='<h3>Comment ça marche</h3>';
+  G.forEach(function(sec){
+    h+='<h4>'+sec.h+'</h4>';
+    sec.p.forEach(function(par){h+='<p>'+par+'</p>';});
+  });
+  h+='<h4>Toutes les métriques</h4>';
+  var T=(root_HELP()||{}).TIPS||{};
+  Object.keys(T).forEach(function(k){h+='<p><b>'+T[k].t+'</b> — '+T[k].d+'</p>';});
+  showModal(h);
+}
+function showModal(html){
+  var back=document.createElement("div");
+  back.className="modalback";
+  back.innerHTML='<div class="modal" role="dialog" aria-modal="true"><button class="modalx" type="button" aria-label="Fermer">×</button><div class="modalbody">'+html+'</div></div>';
+  function close(){back.remove();document.removeEventListener("keydown",esc);}
+  function esc(e){if(e.key==="Escape")close();}
+  back.addEventListener("click",function(e){if(e.target===back)close();});
+  back.querySelector(".modalx").addEventListener("click",close);
+  document.addEventListener("keydown",esc);
+  document.body.appendChild(back);
+  back.querySelector(".modalx").focus();
+}
+document.addEventListener("click",function(e){
+  var b=e.target.closest&&e.target.closest(".tipbtn");
+  if(b){e.preventDefault();e.stopPropagation();openTip(b.dataset.tip);}
+});
 
 // ---------- accès à la grille ----------
 function cellAt(i,t){var g=G.grid[i];return (g&&!g.missing)?g.hours[t]:null;}
@@ -598,13 +640,14 @@ function renderPanel(){
   var h='<div class="phrow"><div><h2 class="ph">'+sp.name+'</h2><p class="pz">'+ZONES[sp.zone]+'</p></div>'+
     '<button class="fav" id="favbtn" type="button" aria-pressed="'+(FAV[sel]?"true":"false")+'" aria-label="Ajouter aux favoris">'+
     '<svg viewBox="0 0 20 20" width="24" height="24"><path d="'+STARPATH+'" fill="currentColor"/></svg></button></div>';
-  if(good)h+='<div class="vrow">'+starSVG(c.stars,19,colStars(c.stars))+'<span class="tag" style="background:'+colStars(c.stars)+'">'+tagFor(c.stars)+'</span></div>';
+  if(good)h+='<div class="vrow">'+starSVG(c.stars,19,colStars(c.stars))+'<span class="tag" style="background:'+colStars(c.stars)+'">'+tagFor(c.stars)+'</span>'+tipBtn("etoiles")+'</div>';
   else h+='<div class="vrow">'+starSVG(0,19)+'<span class="tag" style="background:'+colCell(c)+'">'+
     (!c?"Pas de donnée":c.fail==="vent"||c.fail==="gros"?"Vagues inexploitables":c.fail==="faible"?"Des vagues, mais rien à en tirer":"Pas de vague")+'</span></div>';
   if(c&&c.fail==="faible"){
     h+='<div class="bars">'+bar("Taille",c.q.size,"var(--s-none)")+bar("Propreté",c.q.clean,"var(--s-none)")+bar("Marée",c.q.tide,"var(--s-none)")+'</div>';
   }
   if(c&&!c.fail){
+    h+='<div class="barshead">Composition de la note'+tipBtn("composantes")+'</div>';
     h+='<div class="bars">'+bar("Taille",c.q.size,colStars(c.stars))+bar("Propreté",c.q.clean,colStars(c.stars))+bar("Marée",c.q.tide,colStars(c.stars))+'</div>';
   }
   if(c&&c.face!=null){
@@ -616,23 +659,23 @@ function renderPanel(){
 
   if(c&&c.face!=null){
     // orientations d'abord : c'est ce qui explique tout le reste
-    h+='<div class="sect">Orientations</div><div class="comprow">'+compass(sp,c)+'<div class="complegend">'+
+    h+='<div class="sect">Orientations'+tipBtn("fenetre")+'</div><div class="comprow">'+compass(sp,c)+'<div class="complegend">'+
       '<div><i style="background:var(--land-edge);height:4px"></i>Le spot regarde au <b>'+bearingWord(sp.orient)+'</b> ('+sp.orient+'\u00b0). La zone claire est sa fen\u00eatre de houle.</div>'+
       '<div><i style="background:var(--accent)"></i>Houle du <b>'+bearingWord(c.dir)+'</b> ('+Math.round(c.dir)+'\u00b0)'+(window.Scoring.inWin(c.dir,sp.win[0],sp.win[1])?", dans la fen\u00eatre":", <b>hors fen\u00eatre</b>")+'.</div>'+
       '<div><i style="background:'+(c.wcat===0?"var(--s-top)":c.wcat===3?"var(--s-bad)":"var(--s-mid)")+'"></i>Vent du <b>'+bearingWord(c.wdir)+'</b> ('+Math.round(c.wdir)+'\u00b0), <b>'+WCAT[c.wcat]+'</b>.</div>'+
       '<div style="font-size:11.5px;opacity:.8">Les fl\u00e8ches montrent o\u00f9 va le flux.</div></div></div>';
 
     h+='<dl class="grid">'+
-      '<div class="cell"><dt>Taille de face</dt><dd>'+nf(c.face.toFixed(1))+' m</dd></div>'+
-      '<div class="cell"><dt>Houle au spot</dt><dd>'+nf(c.Hs.toFixed(1))+' m <em>'+arrowGlyph(c.dir,"var(--accent)",11)+' '+Math.round(c.dir)+'\u00b0</em></dd></div>'+
-      '<div class="cell"><dt>P\u00e9riode</dt><dd>'+Math.round(c.T)+' s'+(c.cross?' <em>crois\u00e9e</em>':'')+'</dd></div>'+
-      '<div class="cell"><dt>Vent</dt><dd>'+Math.round(c.wind)+' kn <em>'+(c.gust!=null?("raf. "+Math.round(c.gust)):WCAT[c.wcat])+'</em></dd></div>'+
-      '<div class="cell"><dt>Mar\u00e9e</dt><dd>'+(c.coef!=null?("coef "+c.coef):"\u2014")+' <em>'+nf(c.range.toFixed(1))+' m</em></dd></div>'+
+      '<div class="cell"><dt>Taille de face'+tipBtn("face")+'</dt><dd>'+nf(c.face.toFixed(1))+' m</dd></div>'+
+      '<div class="cell"><dt>Houle au spot'+tipBtn("houle")+'</dt><dd>'+nf(c.Hs.toFixed(1))+' m <em>'+arrowGlyph(c.dir,"var(--accent)",11)+' '+Math.round(c.dir)+'\u00b0</em></dd></div>'+
+      '<div class="cell"><dt>P\u00e9riode'+tipBtn("periode")+(c.cross?tipBtn("croisee"):"")+'</dt><dd>'+Math.round(c.T)+' s'+(c.cross?' <em>crois\u00e9e</em>':'')+'</dd></div>'+
+      '<div class="cell"><dt>Vent'+tipBtn("vent")+'</dt><dd>'+Math.round(c.wind)+' kn <em>'+(c.gust!=null?("raf. "+Math.round(c.gust)):WCAT[c.wcat])+'</em></dd></div>'+
+      '<div class="cell"><dt>Mar\u00e9e'+tipBtn("maree")+'</dt><dd>'+(c.coef!=null?("coef "+c.coef):"\u2014")+' <em>'+nf(c.range.toFixed(1))+' m</em></dd></div>'+
       '<div class="cell"><dt>Eau / air</dt><dd>'+(c.sst!=null?(Math.round(c.sst)+'\u00b0'):'\u2014')+' <em>'+Math.round(c.air)+'\u00b0 air</em></dd></div>'+
       '</dl>';
 
     h+='<div class="sect">Qualit\u00e9 heure par heure</div>'+hourCurve(sel);
-    h+='<div class="sect">Mar\u00e9e \u2014 fen\u00eatre du spot en couleur</div>'+tideCurve(sel);
+    h+='<div class="sect">Mar\u00e9e \u2014 fen\u00eatre du spot en couleur'+tipBtn("maree")+'</div>'+tideCurve(sel);
 
     var ws=wetsuit(c.sst);
     h+='<p class="kit">'+(c.rain>0.2?('Pluie <b>'+nf(c.rain.toFixed(1))+' mm</b>. '):'Temps sec. ')+(ws?('Combinaison : <b>'+ws+'</b>'):'')+'</p>';
@@ -644,7 +687,7 @@ function renderPanel(){
     (sp.note?('<span style="flex-basis:100%">'+sp.note+'</span>'):'')+'</div></details>';
 
   if(day<=todayIdx()){
-    h+='<div class="sect">Carnet</div>';
+    h+='<div class="sect">Carnet'+tipBtn("carnet")+'</div>';
     if(!logOpen)h+='<button class="logbtn" id="opnlog" type="button">Noter cette session</button>';
     else{
       h+='<div class="logform"><p>Ce que tu as vraiment trouvé le '+new Date(dayOf(ti)+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"long"})+(bh?' (annoncé '+nf(bh.c.stars)+'★)':'')+' :</p>'+
@@ -852,6 +895,12 @@ function boot(){
     drawMapBase();mapGestures();wireUI();
     $("boot").hidden=true;$("app").hidden=false;
     stamp();render();scrollStripTo(ti);
+    try{
+      if(!localStorage.getItem("houle-vu")){
+        localStorage.setItem("houle-vu","1");
+        setTimeout(openGuide,700);
+      }
+    }catch(e){}
   }).catch(function(err){
     $("boot").innerHTML='<h2>Pas de données</h2><p>'+(err&&err.message==="réseau indisponible"
       ?"Impossible de joindre Open-Meteo et aucune sauvegarde locale. Reviens quand tu auras du réseau."
@@ -866,6 +915,7 @@ function step(n){
   ti=t;render();scrollStripTo(ti);
 }
 function wireUI(){
+  $("btnGuide").addEventListener("click",openGuide);
   $("prev").addEventListener("click",function(){step(-1);});
   $("next").addEventListener("click",function(){step(1);});
   $("btnNow").addEventListener("click",function(){
