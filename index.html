@@ -14,11 +14,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Chart plate on the left, spot dossier on the right; week strip and hour timeline above. */
 :root{
   --sea:#dcebef; --sea-deep:#c3dbe2; --land:#ece3d2; --land-edge:#b9a98c;
   --ink:#1d2a30; --ink-soft:#5a6b73; --rule:#c2ccd0; --panel:#f7f4ed; --chrome:#fffdf8;
-  --accent:#125f70; --night:#8fa3ab;
+  --accent:#125f70; --star-off:#c8d1d4;
   --s-none:#9aa7ad; --s-bad:#c0392b; --s-low:#dd6a2b; --s-mid:#dda52b; --s-good:#8aa62f; --s-top:#2e8b57;
   --display:"Fraunces",Georgia,serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
   color-scheme:light;
@@ -27,14 +26,14 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --sea:#16272e; --sea-deep:#0f1d23; --land:#2b2f2c; --land-edge:#4f5851;
   --ink:#e6ece9; --ink-soft:#9aa9a6; --rule:#33403f; --panel:#161c1e; --chrome:#101618;
-  --accent:#5fc7cf; --night:#46565c;
+  --accent:#5fc7cf; --star-off:#3a4749;
   --s-none:#5d6c72; --s-bad:#e05a4c; --s-low:#ef8340; --s-mid:#e8b944; --s-good:#a2bf42; --s-top:#46b877;
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --sea:#16272e; --sea-deep:#0f1d23; --land:#2b2f2c; --land-edge:#4f5851;
   --ink:#e6ece9; --ink-soft:#9aa9a6; --rule:#33403f; --panel:#161c1e; --chrome:#101618;
-  --accent:#5fc7cf; --night:#46565c;
+  --accent:#5fc7cf; --star-off:#3a4749;
   --s-none:#5d6c72; --s-bad:#e05a4c; --s-low:#ef8340; --s-mid:#e8b944; --s-good:#a2bf42; --s-top:#46b877;
   color-scheme:dark;
 }
@@ -43,98 +42,159 @@ html,body{margin:0}
 body{background:var(--chrome);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%}
 img{max-width:100%}
 [hidden]{display:none!important}
-.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 36px}
-header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;border-bottom:1px solid var(--rule);padding-bottom:11px;margin-bottom:14px}
-h1{font-family:var(--display);font-size:clamp(25px,5vw,36px);font-weight:600;margin:0;letter-spacing:-.015em}
-.sub{color:var(--ink-soft);font-size:13.5px;margin:0}
-.stamp{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase;text-align:right}
-.stamp button{font:inherit;background:none;border:none;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline}
+button{font-family:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:16px 36px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 14px;margin-bottom:12px}
+h1{font-family:var(--display);font-size:clamp(23px,5vw,32px);font-weight:600;margin:0;letter-spacing:-.015em}
+.stamp{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-align:right;letter-spacing:.03em}
+.stamp button{background:none;border:none;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline;font-size:11px}
+
+/* verdict */
+.verdict{border:1px solid var(--accent);border-radius:4px;background:var(--panel);padding:12px 14px;margin-bottom:14px;cursor:pointer;display:block;width:100%;text-align:left;color:inherit}
+.verdict:disabled{cursor:default;border-color:var(--rule)}
+.vlab{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);margin-bottom:3px}
+.vmain{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.vspot{font-family:var(--display);font-size:21px;font-weight:600;letter-spacing:-.01em}
+.vwhen{font-family:var(--mono);font-size:14px;color:var(--ink-soft)}
+.vtoday{margin-top:6px;font-size:13px;color:var(--ink-soft);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 
 .days{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin}
-.day{flex:0 0 auto;min-width:72px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);border-radius:3px;padding:6px 8px;cursor:pointer;font-family:var(--body);text-align:left;line-height:1.25}
+.day{flex:0 0 auto;min-width:76px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);border-radius:3px;padding:6px 8px;cursor:pointer;text-align:left;line-height:1.25}
 .day[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--chrome)}
 .day .dn{display:block;font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em}
 .day .dd{display:block;font-family:var(--mono);font-size:14.5px;font-weight:500}
-.day .db{display:inline-block;margin-top:3px;font-family:var(--mono);font-size:10px;padding:1px 4px;border-radius:2px;color:#fff}
+.day .dstars{display:block;margin-top:3px;height:12px}
+.day.conf-mid{opacity:.82}
+.day.conf-low{opacity:.6}
+.day.conf-low .dn::after{content:" ~"}
 
-.timeline{border:1px solid var(--rule);border-radius:3px;background:var(--panel);padding:9px 11px;margin:10px 0 16px}
-.trow{display:flex;align-items:center;gap:10px}
+.timeline{border:1px solid var(--rule);border-radius:3px;background:var(--panel);padding:9px 11px;margin:10px 0 12px}
+.trow{display:flex;align-items:center;gap:9px}
 .tbtn{width:34px;height:34px;flex:0 0 auto;border:1px solid var(--rule);background:var(--chrome);color:var(--ink);border-radius:3px;font-size:15px;cursor:pointer;line-height:1}
 .tbtn:disabled{opacity:.35;cursor:default}
-.tnow{font-family:var(--mono);font-size:20px;font-weight:500;min-width:62px;text-align:center;font-variant-numeric:tabular-nums}
-.tnow span{font-size:12px;color:var(--ink-soft);display:block;font-weight:400;letter-spacing:.03em}
+.tnow{font-family:var(--mono);font-size:19px;font-weight:500;min-width:54px;text-align:center;font-variant-numeric:tabular-nums}
 .tslide{flex:1;min-width:0;accent-color:var(--accent);height:26px}
-.tbest{flex:0 0 auto;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:3px;padding:6px 9px;font-size:12px;cursor:pointer;font-family:var(--body);white-space:nowrap}
+.tbest{flex:0 0 auto;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:3px;padding:6px 9px;font-size:12px;cursor:pointer;white-space:nowrap}
 .spark{display:block;width:100%;height:30px;margin-top:6px}
 
-.cols{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.chip{border:1px solid var(--rule);background:var(--panel);color:var(--ink-soft);border-radius:99px;padding:4px 11px;font-size:12.5px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--chrome);font-weight:500}
+.seg{display:none;gap:0;border:1px solid var(--rule);border-radius:3px;overflow:hidden;margin-left:auto}
+.seg button{border:none;background:var(--panel);color:var(--ink-soft);padding:5px 14px;font-size:12.5px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+@media (max-width:820px){.seg{display:flex}}
+
+.cols{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start}
 @media (max-width:820px){.cols{grid-template-columns:1fr}}
-.plate{border:1px solid var(--rule);border-radius:3px;background:var(--sea);overflow:hidden}
-svg.map{display:block;width:100%;height:auto;touch-action:manipulation}
+.plate{border:1px solid var(--rule);border-radius:3px;background:var(--sea);overflow:hidden;position:relative}
+svg.map{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+svg.map.drag{cursor:grabbing}
+.zoomctl{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px}
+.zoomctl button{width:32px;height:32px;border:1px solid var(--rule);background:var(--chrome);color:var(--ink);border-radius:3px;font-size:16px;cursor:pointer;line-height:1;opacity:.92}
 .dot{cursor:pointer}
 .dot circle.halo{fill:none;stroke:var(--ink);stroke-width:2.5;opacity:0}
 .dot[data-sel="1"] circle.halo{opacity:.85}
+.clu{cursor:pointer}
+.clu text{font-family:var(--mono);font-size:11px;font-weight:500;fill:#fff;pointer-events:none}
 .zlab{font-family:var(--body);font-size:12px;fill:var(--land-edge);letter-spacing:.09em;text-transform:uppercase;pointer-events:none;font-weight:500}
-.brest{font-family:var(--body);font-size:12.5px;fill:var(--ink-soft);pointer-events:none}
-.legend{display:flex;flex-wrap:wrap;gap:9px 14px;align-items:center;padding:9px 11px;border-top:1px solid var(--rule);background:var(--panel);font-size:12px;color:var(--ink-soft)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 13px;align-items:center;padding:8px 11px;border-top:1px solid var(--rule);background:var(--panel);font-size:11.5px;color:var(--ink-soft)}
 .key{display:flex;align-items:center;gap:5px}
-.key i{width:11px;height:11px;border-radius:50%;display:block}
+.key i{width:10px;height:10px;border-radius:50%;display:block}
+
 .panel{border:1px solid var(--rule);border-radius:3px;background:var(--panel);padding:15px;min-width:0}
-.ph{font-family:var(--display);font-size:22px;font-weight:600;margin:0 0 2px;letter-spacing:-.01em}
-.pz{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 12px}
-.verdict{display:flex;align-items:baseline;gap:9px;margin-bottom:11px;flex-wrap:wrap}
-.score{font-family:var(--mono);font-size:29px;font-weight:500;line-height:1;letter-spacing:-.02em}
-.score small{font-size:13px;color:var(--ink-soft);font-weight:400}
+.ph{font-family:var(--display);font-size:21px;font-weight:600;margin:0;letter-spacing:-.01em}
+.phrow{display:flex;align-items:flex-start;gap:8px}
+.fav{background:none;border:none;cursor:pointer;padding:2px;margin-left:auto;color:var(--star-off);flex:0 0 auto}
+.fav[aria-pressed="true"]{color:var(--s-mid)}
+.pz{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:2px 0 11px}
+.vrow{display:flex;align-items:center;gap:10px;margin-bottom:11px;flex-wrap:wrap}
 .tag{font-size:11.5px;padding:3px 8px;border-radius:2px;color:#fff;font-weight:500}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:2px;overflow:hidden;margin-bottom:12px}
 .cell{background:var(--panel);padding:8px 10px;min-width:0}
 .cell dt{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin:0 0 2px}
 .cell dd{margin:0;font-family:var(--mono);font-size:14.5px;font-variant-numeric:tabular-nums}
 .cell dd em{font-style:normal;font-size:11.5px;color:var(--ink-soft)}
-.best{border:1px solid var(--accent);border-radius:2px;padding:8px 10px;margin-bottom:12px;font-size:13.5px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.best{border:1px solid var(--accent);border-radius:2px;padding:8px 10px;margin-bottom:12px;font-size:13.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .best b{font-family:var(--mono);font-weight:500}
-.best button{margin-left:auto;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:3px;padding:4px 9px;font-size:12px;cursor:pointer;font-family:var(--body)}
-.hcurve{display:block;width:100%;height:46px;margin-bottom:12px}
+.best button{margin-left:auto;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:3px;padding:4px 9px;font-size:12px;cursor:pointer}
+.sect{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft);margin:14px 0 6px;font-weight:600}
+.hcurve,.tidecurve{display:block;width:100%;margin-bottom:10px}
+.comprow{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap}
+.compass{width:120px;height:120px;flex:0 0 auto}
+.complegend{flex:1;min-width:150px;font-size:12.5px;color:var(--ink-soft);display:flex;flex-direction:column;gap:5px}
+.complegend b{color:var(--ink);font-weight:500}
+.complegend i.sw{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.complegend i.shore{background:var(--land-edge);height:4px}
+.complegend i.swell{background:var(--accent)}
+.complegend .cnote{font-size:11.5px;opacity:.8;margin-top:1px}
 .analysis{font-size:14.5px;margin:0 0 12px}
+.kit{font-size:13.5px;border-left:2px solid var(--accent);padding-left:10px;margin:0 0 12px;color:var(--ink-soft)}
+.kit b{color:var(--ink);font-weight:500}
 .meta{border-top:1px solid var(--rule);padding-top:10px;font-size:12px;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:4px 15px}
 .meta b{font-weight:500;color:var(--ink)}
 .hint{color:var(--ink-soft);font-size:14px;margin:0}
-.rank{margin-top:16px;border-top:1px solid var(--rule);padding-top:11px}
+.warn{font-size:12.5px;color:var(--ink-soft);border:1px dashed var(--rule);border-radius:3px;padding:7px 9px;margin-bottom:11px}
+
+.logbtn{width:100%;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:3px;padding:8px;font-size:13px;cursor:pointer;margin-bottom:6px}
+.logform{border:1px solid var(--accent);border-radius:3px;padding:11px;margin-bottom:11px}
+.logform p{margin:0 0 7px;font-size:12.5px;color:var(--ink-soft)}
+.starpick{display:flex;gap:2px;margin-bottom:9px}
+.starpick button{background:none;border:none;padding:0;cursor:pointer;width:26px;height:28px;position:relative;color:var(--star-off)}
+.starpick button.on{color:var(--s-mid)}
+.reasons{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+.logform textarea{width:100%;border:1px solid var(--rule);border-radius:3px;background:var(--chrome);color:var(--ink);padding:7px;font-family:inherit;font-size:13px;resize:vertical;min-height:52px}
+.logacts{display:flex;gap:7px;margin-top:9px}
+.logacts button{flex:1;border-radius:3px;padding:7px;font-size:13px;cursor:pointer;border:1px solid var(--rule);background:var(--chrome);color:var(--ink)}
+.logacts button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.rank{margin-top:14px;border-top:1px solid var(--rule);padding-top:11px}
 .rank h2{font-family:var(--body);font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);margin:0 0 8px;font-weight:600}
 .rank ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
 .rank li{display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer;padding:4px 5px;border-radius:2px}
 .rank li:hover{background:var(--chrome)}
-.rank i{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.rank i.pip{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
 .rank .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rank .hh{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft)}
-.rank .sc{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
+
+.sessions{margin-top:22px;border-top:1px solid var(--rule);padding-top:12px}
+.sessions h2{font-family:var(--body);font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);margin:0 0 8px;font-weight:600;display:flex;align-items:center;gap:10px}
+.sessions h2 button{margin-left:auto;border:1px solid var(--rule);background:var(--panel);color:var(--ink-soft);border-radius:3px;padding:3px 9px;font-size:11px;cursor:pointer;text-transform:none;letter-spacing:0}
+.slist{display:flex;flex-direction:column;gap:5px;font-size:13px}
+.srow{display:flex;align-items:center;gap:9px;padding:6px 8px;border:1px solid var(--rule);border-radius:3px;background:var(--panel);flex-wrap:wrap}
+.srow .sd{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft)}
+.srow .sn{font-weight:500}
+.srow .delta{font-family:var(--mono);font-size:11.5px;padding:1px 6px;border-radius:2px}
+.srow .note{flex-basis:100%;font-size:12.5px;color:var(--ink-soft)}
+.srow .del{margin-left:auto;background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:14px;padding:0 3px}
+
 footer{margin-top:24px;border-top:1px solid var(--rule);padding-top:11px;font-size:12px;color:var(--ink-soft)}
 footer p{margin:0 0 5px}
 .boot{padding:40px 16px;text-align:center;color:var(--ink-soft)}
 .boot h2{font-family:var(--display);font-weight:600;color:var(--ink);margin:0 0 8px}
 .boot code{font-family:var(--mono);font-size:12px;background:var(--panel);padding:2px 5px;border-radius:2px}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:var(--ink);color:var(--chrome);padding:9px 16px;border-radius:4px;font-size:13px;z-index:50}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div>
-      <h1>Houle Bretagne</h1>
-      <p class="sub">57 spots du Léon à la Côte Sauvage, notés pour le bodyboard</p>
-    </div>
+    <h1>Houle Bretagne</h1>
     <div class="stamp" id="stamp"></div>
   </header>
 
-  <div id="boot" class="boot"><h2>Chargement des prévisions…</h2><p>Houle, vent et marée sur 57 spots.</p></div>
+  <div id="boot" class="boot"><h2>Chargement des prévisions…</h2><p>Houle, vent, marée et température sur 57 spots.</p></div>
 
   <div id="app" hidden>
+    <button class="verdict" id="verdict" type="button"></button>
+
     <div class="days" id="days" role="group" aria-label="Choisir un jour"></div>
 
     <div class="timeline">
       <div class="trow">
         <button class="tbtn" id="prev" type="button" aria-label="Heure précédente">◀</button>
-        <div class="tnow"><span id="hlab">heure</span><span id="hval" style="font-size:20px;color:var(--ink);font-weight:500">—</span></div>
+        <div class="tnow" id="hval">—</div>
         <input class="tslide" id="slide" type="range" min="5" max="22" step="1" aria-label="Heure de la journée">
         <button class="tbtn" id="next" type="button" aria-label="Heure suivante">▶</button>
         <button class="tbest" id="jump" type="button">Meilleure heure</button>
@@ -142,17 +202,33 @@ footer p{margin:0 0 5px}
       <svg class="spark" id="spark" viewBox="0 0 600 60" preserveAspectRatio="none" aria-hidden="true"></svg>
     </div>
 
+    <div class="chips">
+      <button class="chip" id="f0" type="button" data-min="0">Tous</button>
+      <button class="chip" id="f2" type="button" data-min="2">2★ et +</button>
+      <button class="chip" id="f3" type="button" data-min="3">3★ et +</button>
+      <button class="chip" id="ffav" type="button">Mes spots</button>
+      <div class="seg" id="seg">
+        <button type="button" id="segmap">Carte</button>
+        <button type="button" id="seglist">Liste</button>
+      </div>
+    </div>
+
     <div class="cols">
-      <div>
-        <div class="plate">
+      <div id="leftcol">
+        <div class="plate" id="plate">
           <svg class="map" id="map" viewBox="0 0 1000 960" role="img" aria-label="Carte des spots bretons"></svg>
+          <div class="zoomctl">
+            <button type="button" id="zin" aria-label="Zoomer">+</button>
+            <button type="button" id="zout" aria-label="Dézoomer">−</button>
+            <button type="button" id="zfit" aria-label="Vue d'ensemble" style="font-size:12px">⤢</button>
+          </div>
           <div class="legend">
             <span class="key"><i style="background:var(--s-none)"></i>pas de vague</span>
             <span class="key"><i style="background:var(--s-bad)"></i>inexploitable</span>
-            <span class="key"><i style="background:var(--s-low)"></i>9–11</span>
-            <span class="key"><i style="background:var(--s-mid)"></i>12–13</span>
-            <span class="key"><i style="background:var(--s-good)"></i>14–15</span>
-            <span class="key"><i style="background:var(--s-top)"></i>16+</span>
+            <span class="key"><i style="background:var(--s-low)"></i>1★</span>
+            <span class="key"><i style="background:var(--s-mid)"></i>2★</span>
+            <span class="key"><i style="background:var(--s-good)"></i>3★</span>
+            <span class="key"><i style="background:var(--s-top)"></i>4★</span>
           </div>
         </div>
         <div class="rank"><h2 id="rankh">Classement</h2><ol id="rank"></ol></div>
@@ -160,10 +236,12 @@ footer p{margin:0 0 5px}
       <div class="panel" id="panel"></div>
     </div>
 
+    <div class="sessions" id="sessions"></div>
+
     <footer>
       <p><b>Données</b> — Open-Meteo, modèles de vagues ECMWF et Météo-France, rafraîchies toutes les 6 h. Marée déduite du niveau de la mer prévu.</p>
-      <p><b>Taille de face</b> — estimation du déferlement, pas la hauteur de houle du modèle : abri et angle d'incidence du spot, puis gain de levée selon la période, puis conversion en hauteur de face. Un ordre de grandeur, pas une mesure.</p>
-      <p>Fiabilité : J+0 à J+3 solide · J+4 à J+6 tendance · au-delà, indicatif.</p>
+      <p><b>Taille de face</b> — estimation du déferlement : abri et angle d'incidence du spot, gain de levée selon la période, puis conversion en hauteur de face. Un ordre de grandeur, pas une mesure.</p>
+      <p><b>Fiabilité</b> — les jours au-delà de J+3 sont affichés en retrait, ceux au-delà de J+6 nettement estompés et marqués d'un tilde. Ne pose pas un jour de congé sur une prévision à J+8.</p>
     </footer>
   </div>
 </div>
@@ -172,73 +250,75 @@ footer p{margin:0 0 5px}
 (function(){
 "use strict";
 
-// name, lat, lon, orient, winLo, winHi, shelter, perMin, tide, min, max, route, shorebreak, zone
+// nom, lat, lon, orient, winLo, winHi, abri, perMin, maree, min, max, shorebreak, zone
 var S=[
-["Le Dossen",48.715,-4.015,340,290,40,0.90,9,"mi",0.8,3.0,"1 h 15",1,0],
-["Keremma",48.665,-4.230,350,300,50,0.80,9,"mihaute",1.0,2.5,"1 h 10",0,0],
-["Les Crapauds",48.675,-4.320,345,300,40,0.80,9,"mibasse",0.8,2.5,"1 h 05",0,0],
-["Boutrouilles",48.660,-4.360,350,300,40,0.85,9,"mibasse",0.8,2.5,"1 h",1,0],
-["Meneham",48.657,-4.378,340,300,30,0.80,10,"bassemi",1.0,2.5,"1 h",1,0],
-["Le Curnic",48.640,-4.420,345,300,40,0.75,9,"mihaute",1.0,2.5,"55 min",0,0],
-["Tresseny",48.632,-4.400,350,310,40,0.70,10,"mi",1.2,2.5,"55 min",0,0],
-["Saint-Michel",48.610,-4.560,320,290,10,0.85,9,"mibasse",0.8,2.5,"50 min",0,0],
-["Lilia",48.618,-4.570,330,300,20,0.75,10,"mi",1.0,2.5,"50 min",0,0],
-["Sainte-Marguerite",48.585,-4.590,300,270,350,0.80,9,"mibasse",0.8,2.5,"45 min",0,0],
-["Les Trois Moutons",48.565,-4.660,305,275,355,0.85,9,"mibasse",0.8,2.5,"45 min",0,0],
-["Melon",48.500,-4.770,290,260,340,0.85,9,"mibasse",0.8,2.5,"45 min",1,1],
-["Porscave",48.470,-4.760,285,255,330,0.80,10,"mi",1.0,2.5,"45 min",0,1],
-["Les Blancs Sablons",48.365,-4.795,290,270,330,0.60,10,"mihaute",1.0,3.0,"35 min",0,1],
-["Bertheaume",48.335,-4.700,225,235,280,0.30,12,"mihaute",2.0,5.0,"25 min",0,1],
-["Le Trez Hir",48.345,-4.705,250,240,290,0.35,11,"mi",1.8,4.5,"25 min",0,1],
-["Porsmilin",48.345,-4.655,230,240,290,0.35,11,"toutes",1.5,4.0,"20 min",0,1],
-["Trégana",48.360,-4.640,240,240,290,0.30,12,"mihaute",2.0,4.5,"20 min",0,1],
-["Pen Hat",48.278,-4.615,280,250,330,1.10,10,"mibasse",0.8,3.0,"1 h",0,2],
-["Kerloc'h",48.245,-4.560,265,235,320,1.00,9,"mi",0.8,2.8,"1 h",0,2],
-["Anse de Dinan",48.225,-4.575,260,240,310,0.75,10,"mihaute",1.2,3.5,"1 h 05",0,2],
-["La Palue",48.230,-4.545,250,220,320,1.10,9,"toutes",0.8,3.5,"1 h",1,2],
-["Lostmarc'h",48.215,-4.540,250,225,310,1.00,9,"mibasse",0.8,3.0,"1 h 05",0,2],
-["Plage de l'Aber",48.205,-4.480,190,160,230,0.25,12,"mihaute",2.0,5.0,"1 h 10",0,2],
-["Morgat",48.230,-4.495,140,110,190,0.20,11,"mi",2.0,5.0,"1 h 05",0,2],
-["Trez Bellec",48.215,-4.395,305,285,350,0.55,11,"mihaute",1.2,3.5,"1 h",0,3],
-["Pentrez",48.212,-4.300,310,290,350,0.55,11,"mihaute",1.2,3.5,"1 h",0,3],
-["Sainte-Anne-la-Palud",48.152,-4.275,320,295,355,0.50,11,"mi",1.5,4.5,"1 h 05",0,3],
-["Kervijen",48.160,-4.270,315,295,350,0.50,11,"mibasse",1.5,4.0,"1 h 05",0,3],
-["Le Ris",48.095,-4.300,350,320,30,0.30,12,"mihaute",2.0,5.0,"1 h 10",0,3],
-["Pors Péron",48.085,-4.500,320,295,0,0.55,10,"mihaute",1.2,3.0,"1 h 20",0,4],
-["Baie des Trépassés",48.035,-4.710,290,250,330,0.70,9,"mihaute",0.8,3.0,"1 h 30",0,4],
-["Gwendrez",48.010,-4.540,250,220,310,0.95,9,"mibasse",0.8,2.8,"1 h 25",0,4],
-["Pors Poulhan",47.985,-4.480,255,225,310,0.85,9,"mi",0.8,2.5,"1 h 25",0,4],
-["Kersigneau",47.955,-4.430,255,220,320,0.95,9,"mibasse",0.8,2.8,"1 h 25",0,5],
-["Penhors",47.925,-4.395,260,220,320,0.95,9,"mibasse",0.8,3.0,"1 h 25",0,5],
-["Tronoën",47.870,-4.350,255,210,325,1.00,8,"mimontante",0.7,3.0,"1 h 30",1,5],
-["La Torche",47.838,-4.355,255,200,330,1.00,8,"mimontante",0.6,3.5,"1 h 30",1,5],
-["Pors Carn",47.828,-4.373,250,220,300,0.70,9,"mihaute",1.0,2.5,"1 h 30",0,5],
-["Le Steir",47.815,-4.385,255,225,300,0.75,10,"mibasse",1.0,2.5,"1 h 35",1,5],
-["Lesconil",47.795,-4.215,200,170,240,0.40,10,"mihaute",1.5,3.5,"1 h 40",0,6],
-["Mousterlin",47.845,-4.020,190,160,230,0.35,10,"mi",1.5,3.5,"1 h 50",0,6],
-["Trévignon",47.790,-3.870,195,165,235,0.45,10,"mibasse",1.2,3.0,"2 h",0,6],
-["Raguenez",47.795,-3.800,200,170,240,0.40,10,"mihaute",1.2,3.0,"2 h",0,6],
-["Kerfany",47.790,-3.660,210,180,250,0.40,10,"mi",1.5,3.0,"2 h 05",0,6],
-["Le Pouldu",47.765,-3.545,210,185,260,0.60,10,"mibasse",1.2,3.0,"2 h 10",0,6],
-["Guidel-Plages",47.770,-3.535,215,195,275,0.75,10,"mibasse",1.0,3.0,"2 h 15",0,7],
-["Fort-Bloqué",47.715,-3.435,220,200,280,0.70,10,"mi",1.0,3.0,"2 h 20",0,7],
-["Kerminihy",47.625,-3.155,240,215,290,0.80,10,"mibasse",1.0,2.8,"2 h 35",0,7],
-["Sainte-Barbe",47.590,-3.115,245,220,295,0.85,10,"mibasse",1.0,2.8,"2 h 40",0,7],
-["Penthièvre",47.570,-3.140,250,225,300,0.85,10,"mi",1.0,2.8,"2 h 40",0,7],
-["Kerhostin",47.560,-3.135,255,230,300,0.85,10,"mibasse",1.0,2.5,"2 h 45",0,7],
-["Port Blanc",47.530,-3.140,260,230,300,0.85,11,"bassemi",1.0,2.5,"2 h 45",1,7],
-["Port Bara",47.520,-3.135,255,230,300,0.85,11,"bassemi",1.0,2.5,"2 h 45",1,7],
-["Port Rhu",47.510,-3.130,255,230,300,0.80,11,"bassemi",1.0,2.5,"2 h 50",1,7],
-["Port Kerné",47.500,-3.125,250,225,295,0.80,11,"mi",1.0,2.5,"2 h 50",0,7],
-["Le Vivier",47.490,-3.130,250,225,295,0.75,11,"mihaute",1.2,2.5,"2 h 55",0,7]
+["Le Dossen",48.715,-4.015,340,290,40,0.90,9,"mi",0.8,3.0,1,0],
+["Keremma",48.665,-4.230,350,300,50,0.80,9,"mihaute",1.0,2.5,0,0],
+["Les Crapauds",48.675,-4.320,345,300,40,0.80,9,"mibasse",0.8,2.5,0,0],
+["Boutrouilles",48.660,-4.360,350,300,40,0.85,9,"mibasse",0.8,2.5,1,0],
+["Meneham",48.657,-4.378,340,300,30,0.80,10,"bassemi",1.0,2.5,1,0],
+["Le Curnic",48.640,-4.420,345,300,40,0.75,9,"mihaute",1.0,2.5,0,0],
+["Tresseny",48.632,-4.400,350,310,40,0.70,10,"mi",1.2,2.5,0,0],
+["Saint-Michel",48.610,-4.560,320,290,10,0.85,9,"mibasse",0.8,2.5,0,0],
+["Lilia",48.618,-4.570,330,300,20,0.75,10,"mi",1.0,2.5,0,0],
+["Sainte-Marguerite",48.585,-4.590,300,270,350,0.80,9,"mibasse",0.8,2.5,0,0],
+["Les Trois Moutons",48.565,-4.660,305,275,355,0.85,9,"mibasse",0.8,2.5,0,0],
+["Melon",48.500,-4.770,290,260,340,0.85,9,"mibasse",0.8,2.5,1,1],
+["Porscave",48.470,-4.760,285,255,330,0.80,10,"mi",1.0,2.5,0,1],
+["Les Blancs Sablons",48.365,-4.795,290,270,330,0.60,10,"mihaute",1.0,3.0,0,1],
+["Bertheaume",48.335,-4.700,225,235,280,0.30,12,"mihaute",2.0,5.0,0,1],
+["Le Trez Hir",48.345,-4.705,250,240,290,0.35,11,"mi",1.8,4.5,0,1],
+["Porsmilin",48.345,-4.655,230,240,290,0.35,11,"toutes",1.5,4.0,0,1],
+["Trégana",48.360,-4.640,240,240,290,0.30,12,"mihaute",2.0,4.5,0,1],
+["Pen Hat",48.278,-4.615,280,250,330,1.10,10,"mibasse",0.8,3.0,0,2],
+["Kerloc'h",48.245,-4.560,265,235,320,1.00,9,"mi",0.8,2.8,0,2],
+["Anse de Dinan",48.225,-4.575,260,240,310,0.75,10,"mihaute",1.2,3.5,0,2],
+["La Palue",48.230,-4.545,250,220,320,1.10,9,"toutes",0.8,3.5,1,2],
+["Lostmarc'h",48.215,-4.540,250,225,310,1.00,9,"mibasse",0.8,3.0,0,2],
+["Plage de l'Aber",48.205,-4.480,190,160,230,0.25,12,"mihaute",2.0,5.0,0,2],
+["Morgat",48.230,-4.495,140,110,190,0.20,11,"mi",2.0,5.0,0,2],
+["Trez Bellec",48.215,-4.395,305,285,350,0.55,11,"mihaute",1.2,3.5,0,3],
+["Pentrez",48.212,-4.300,310,290,350,0.55,11,"mihaute",1.2,3.5,0,3],
+["Sainte-Anne-la-Palud",48.152,-4.275,320,295,355,0.50,11,"mi",1.5,4.5,0,3],
+["Kervijen",48.160,-4.270,315,295,350,0.50,11,"mibasse",1.5,4.0,0,3],
+["Le Ris",48.095,-4.300,350,320,30,0.30,12,"mihaute",2.0,5.0,0,3],
+["Pors Péron",48.085,-4.500,320,295,0,0.55,10,"mihaute",1.2,3.0,0,4],
+["Baie des Trépassés",48.035,-4.710,290,250,330,0.70,9,"mihaute",0.8,3.0,0,4],
+["Gwendrez",48.010,-4.540,250,220,310,0.95,9,"mibasse",0.8,2.8,0,4],
+["Pors Poulhan",47.985,-4.480,255,225,310,0.85,9,"mi",0.8,2.5,0,4],
+["Kersigneau",47.955,-4.430,255,220,320,0.95,9,"mibasse",0.8,2.8,0,5],
+["Penhors",47.925,-4.395,260,220,320,0.95,9,"mibasse",0.8,3.0,0,5],
+["Tronoën",47.870,-4.350,255,210,325,1.00,8,"mimontante",0.7,3.0,1,5],
+["La Torche",47.838,-4.355,255,200,330,1.00,8,"mimontante",0.6,3.5,1,5],
+["Pors Carn",47.828,-4.373,250,220,300,0.70,9,"mihaute",1.0,2.5,0,5],
+["Le Steir",47.815,-4.385,255,225,300,0.75,10,"mibasse",1.0,2.5,1,5],
+["Lesconil",47.795,-4.215,200,170,240,0.40,10,"mihaute",1.5,3.5,0,6],
+["Mousterlin",47.845,-4.020,190,160,230,0.35,10,"mi",1.5,3.5,0,6],
+["Trévignon",47.790,-3.870,195,165,235,0.45,10,"mibasse",1.2,3.0,0,6],
+["Raguenez",47.795,-3.800,200,170,240,0.40,10,"mihaute",1.2,3.0,0,6],
+["Kerfany",47.790,-3.660,210,180,250,0.40,10,"mi",1.5,3.0,0,6],
+["Le Pouldu",47.765,-3.545,210,185,260,0.60,10,"mibasse",1.2,3.0,0,6],
+["Guidel-Plages",47.770,-3.535,215,195,275,0.75,10,"mibasse",1.0,3.0,0,7],
+["Fort-Bloqué",47.715,-3.435,220,200,280,0.70,10,"mi",1.0,3.0,0,7],
+["Kerminihy",47.625,-3.155,240,215,290,0.80,10,"mibasse",1.0,2.8,0,7],
+["Sainte-Barbe",47.590,-3.115,245,220,295,0.85,10,"mibasse",1.0,2.8,0,7],
+["Penthièvre",47.570,-3.140,250,225,300,0.85,10,"mi",1.0,2.8,0,7],
+["Kerhostin",47.560,-3.135,255,230,300,0.85,10,"mibasse",1.0,2.5,0,7],
+["Port Blanc",47.530,-3.140,260,230,300,0.85,11,"bassemi",1.0,2.5,1,7],
+["Port Bara",47.520,-3.135,255,230,300,0.85,11,"bassemi",1.0,2.5,1,7],
+["Port Rhu",47.510,-3.130,255,230,300,0.80,11,"bassemi",1.0,2.5,1,7],
+["Port Kerné",47.500,-3.125,250,225,295,0.80,11,"mi",1.0,2.5,0,7],
+["Le Vivier",47.490,-3.130,250,225,295,0.75,11,"mihaute",1.2,2.5,0,7]
 ];
 var ZONES=["Côte nord du Léon","Côte ouest du Léon","Presqu'île de Crozon","Baie de Douarnenez","Cap Sizun","Baie d'Audierne","Sud Finistère","Morbihan — Côte Sauvage"];
 var TIDE={mi:"mi-marée",mihaute:"mi à haute",mibasse:"mi à basse",bassemi:"basse à mi",mimontante:"mi-marée montante",toutes:"toutes marées"};
+var TWIN={mi:[0.33,0.67],mihaute:[0.50,0.97],mibasse:[0.03,0.50],bassemi:[0.03,0.50],mimontante:[0.33,0.78],toutes:[0,1]};
 var WCAT=["offshore","cross-offshore","cross-onshore","onshore"];
+var REASONS=["plus petit qu'annoncé","plus gros qu'annoncé","trop mou","vent pire que prévu","marée décalée","bancs mauvais","meilleur que prévu"];
 
 var COAST="-2.76 47.64,-2.79 47.64,-2.77 47.64,-2.8 47.63,-2.85 47.63,-2.87 47.61,-2.92 47.59,-2.91 47.61,-2.94 47.6,-2.94 47.63,-2.93 47.64,-2.96 47.64,-2.97 47.66,-2.98 47.66,-2.96 47.6,-2.93 47.57,-2.94 47.56,-2.94 47.56,-2.95 47.57,-2.96 47.57,-2.97 47.58,-2.99 47.59,-2.99 47.58,-3 47.58,-3.01 47.61,-3.02 47.6,-3.02 47.59,-3.02 47.58,-3.04 47.59,-3.07 47.58,-3.11 47.58,-3.09 47.59,-3.11 47.6,-3.12 47.6,-3.13 47.59,-3.12 47.58,-3.13 47.55,-3.12 47.52,-3.08 47.48,-3.12 47.48,-3.13 47.48,-3.14 47.51,-3.14 47.53,-3.13 47.56,-3.14 47.6,-3.17 47.62,-3.2 47.64,-3.19 47.68,-3.11 47.7,-3.12 47.73,-3.14 47.72,-3.14 47.75,-3.14 47.75,-3.15 47.74,-3.19 47.75,-3.17 47.73,-3.16 47.71,-3.17 47.7,-3.18 47.71,-3.21 47.7,-3.19 47.68,-3.21 47.68,-3.22 47.66,-3.26 47.68,-3.36 47.7,-3.34 47.7,-3.28 47.69,-3.28 47.7,-3.3 47.7,-3.36 47.71,-3.36 47.72,-3.34 47.73,-3.34 47.74,-3.32 47.74,-3.3 47.77,-3.28 47.78,-3.28 47.79,-3.33 47.75,-3.38 47.74,-3.37 47.73,-3.36 47.72,-3.45 47.7,-3.46 47.71,-3.53 47.78,-3.54 47.77,-3.62 47.78,-3.63 47.78,-3.65 47.79,-3.69 47.79,-3.71 47.8,-3.71 47.81,-3.72 47.81,-3.77 47.79,-3.79 47.8,-3.85 47.8,-3.89 47.84,-3.89 47.85,-3.9 47.86,-3.92 47.87,-3.96 47.9,-3.99 47.9,-3.98 47.88,-3.99 47.87,-4.01 47.85,-4.03 47.85,-4.01 47.86,-4 47.87,-4.02 47.87,-4.04 47.85,-4.08 47.88,-4.11 47.88,-4.12 47.89,-4.13 47.92,-4.14 47.91,-4.14 47.9,-4.11 47.87,-4.13 47.87,-4.15 47.85,-4.17 47.88,-4.19 47.88,-4.19 47.86,-4.17 47.85,-4.18 47.84,-4.15 47.84,-4.15 47.83,-4.19 47.81,-4.22 47.8,-4.37 47.81,-4.37 47.83,-4.35 47.84,-4.35 47.86,-4.37 47.92,-4.43 47.98,-4.53 48.03,-4.57 48.01,-4.6 48.03,-4.65 48.03,-4.73 48.04,-4.7 48.07,-4.69 48.07,-4.36 48.11,-4.3 48.1,-4.29 48.11,-4.28 48.14,-4.28 48.16,-4.29 48.17,-4.3 48.2,-4.31 48.21,-4.37 48.21,-4.38 48.23,-4.4 48.23,-4.46 48.25,-4.48 48.24,-4.53 48.18,-4.56 48.18,-4.55 48.2,-4.56 48.23,-4.55 48.25,-4.56 48.26,-4.63 48.27,-4.63 48.29,-4.57 48.29,-4.58 48.31,-4.56 48.34,-4.55 48.35,-4.53 48.34,-4.54 48.3,-4.52 48.3,-4.43 48.3,-4.4 48.29,-4.38 48.29,-4.33 48.3,-4.26 48.3,-4.29 48.29,-4.27 48.29,-4.19 48.3,-4.19 48.31,-4.23 48.31,-4.24 48.32,-4.26 48.31,-4.27 48.31,-4.28 48.32,-4.33 48.32,-4.3 48.34,-4.27 48.36,-4.29 48.36,-4.33 48.35,-4.33 48.35,-4.32 48.35,-4.32 48.36,-4.33 48.36,-4.34 48.35,-4.35 48.35,-4.38 48.34,-4.41 48.34,-4.4 48.34,-4.41 48.35,-4.46 48.34,-4.4 48.39,-4.29 48.43,-4.36 48.41,-4.46 48.4,-4.52 48.37,-4.6 48.35,-4.62 48.35,-4.69 48.36,-4.7 48.34,-4.7 48.34,-4.75 48.34,-4.77 48.35,-4.78 48.38,-4.76 48.38,-4.76 48.39,-4.78 48.42,-4.79 48.44,-4.77 48.47,-4.75 48.47,-4.75 48.48,-4.78 48.49,-4.76 48.52,-4.72 48.57,-4.7 48.56,-4.71 48.57,-4.69 48.58,-4.64 48.58,-4.59 48.57,-4.58 48.57,-4.61 48.6,-4.6 48.61,-4.53 48.6,-4.56 48.61,-4.55 48.62,-4.56 48.62,-4.56 48.63,-4.46 48.63,-4.43 48.64,-4.41 48.64,-4.43 48.65,-4.43 48.66,-4.4 48.66,-4.34 48.68,-4.32 48.68,-4.3 48.66,-4.31 48.64,-4.28 48.64,-4.24 48.66,-4.19 48.65,-4.19 48.66,-4.21 48.66,-4.17 48.69,-4.13 48.7,-4.09 48.69,-4.08 48.7,-4.06 48.69,-4.05 48.7,-4.06 48.71,-3.97 48.73,-3.97 48.71,-3.96 48.7,-3.97 48.69,-3.95 48.68,-3.95 48.66,-3.93 48.68,-3.89 48.68,-3.91 48.67,-3.91 48.66,-3.85 48.63,-3.84 48.64,-3.85 48.64,-3.84 48.65,-3.85 48.67,-3.86 48.69,-3.85 48.69,-3.85 48.68,-3.84 48.67,-3.84 48.71,-3.83 48.72,-3.81 48.72,-3.81 48.73,-3.8 48.72,-3.78 48.72,-3.73 48.72,-3.69 48.7,-3.64 48.7,-3.64 48.69,-3.58 48.68,-3.57 48.69,-3.58 48.71,-3.58 48.73,-3.53 48.74,-3.58 48.77,-3.58 48.79,-3.57 48.8,-3.54 48.81,-3.52 48.84,-3.42 48.82,-3.43 48.81,-3.4 48.81,-3.37 48.82,-3.27 48.85,-3.26 48.85,-3.23 48.87,-3.21 48.87,-3.21 48.86,-3.22 48.82,-3.23 48.81,-3.22 48.79,-3.21 48.82,-3.14 48.86,-3.13 48.86,-3.12 48.87,-3.09 48.87,-3.08 48.86,-3.09 48.84,-3.08 48.83,-3.1 48.79,-3.13 48.77,-3.13 48.76,-3.12 48.76,-3.07 48.82,-3.05 48.82,-3.03 48.83,-3.01 48.82,-3.02 48.81,-3.01 48.81,-3.01 48.81,-3.04 48.79,-3.04 48.79,-3 48.77,-2.93 48.77,-2.93 48.75,-2.95 48.74,-2.95 48.73,-2.83 48.66,-2.81 48.61,-2.82 48.6,-2.81 48.6,-2.77 48.58|-2.78 47.5,-2.82 47.5,-2.83 47.5,-2.87 47.54,-2.91 47.56,-2.89 47.57,-2.86 47.57,-2.85 47.55,-2.83 47.55,-2.82 47.55,-2.81 47.57,-2.8 47.56,-2.77 47.55";
 
-// ---------- projection ----------
+// ---- projection ----
 var LON0=-5.30,LON1=-2.85,LAT0=47.35,LAT1=48.90;
 var KX=Math.cos((LAT0+LAT1)/2*Math.PI/180),W=1000,H=960,PAD=26;
 var spanX=(LON1-LON0)*KX,spanY=LAT1-LAT0;
@@ -247,21 +327,12 @@ var offX=(W-spanX*sc)/2,offY=(H-spanY*sc)/2;
 function px(l){return offX+(l-LON0)*KX*sc;}
 function py(l){return H-offY-(l-LAT0)*sc;}
 
-// ---------- helpers ----------
+// ---- helpers ----
 function nf(x){return String(x).replace(".",",");}
 function angDiff(a,b){var d=Math.abs(a-b)%360;return d>180?360-d:d;}
 function inWin(d,a,b){return a<=b?(d>=a&&d<=b):(d>=a||d<=b);}
-function bearingWord(deg){
-  var n=["nord","nord-est","est","sud-est","sud","sud-ouest","ouest","nord-ouest"];
-  return n[Math.round(deg/45)%8];
-}
-// Breaking height: shelter + incidence, then shoaling gain by period, then face conversion.
+function bearingWord(deg){var n=["nord","nord-est","est","sud-est","sud","sud-ouest","ouest","nord-ouest"];return n[Math.round(deg/45)%8];}
 function shoal(T){return Math.min(1.45,0.55+0.055*T);}
-function nearshore(sp,H0,dir){
-  var inc=angDiff(dir,sp[3]);
-  var kd=Math.pow(Math.max(Math.cos(inc*Math.PI/180),0.08),0.25);
-  return H0*sp[6]*kd;
-}
 function faceOf(Hs,T){return Hs*shoal(T)*1.45;}
 function tideWord(t,rising){
   if(t<=0.18)return "marée basse";
@@ -272,17 +343,105 @@ function tideWord(t,rising){
 }
 function tideScore(code,lvl,rising){
   if(code==="toutes")return 3;
-  var w={mi:[0.33,0.67],mihaute:[0.5,0.97],mibasse:[0.03,0.5],bassemi:[0.03,0.5],mimontante:[0.33,0.78]}[code];
-  var ok=lvl>=w[0]&&lvl<=w[1];
+  var w=TWIN[code],ok=lvl>=w[0]&&lvl<=w[1];
   if(code==="mimontante"&&!rising)ok=false;
   if(ok)return 4;
   var d=Math.min(Math.abs(lvl-w[0]),Math.abs(lvl-w[1]));
   return d<0.15?2.5:1;
 }
+// score /20 -> étoiles sur 4, demies comprises
+function stars(sc){
+  if(sc<9)return 0;
+  if(sc<10)return 1; if(sc<11.5)return 1.5; if(sc<13)return 2;
+  if(sc<14)return 2.5; if(sc<15.5)return 3; if(sc<17)return 3.5;
+  return 4;
+}
+var STARPATH="M10 1.4l2.6 5.3 5.9.85-4.25 4.15 1 5.85L10 14.8 4.75 17.55l1-5.85L1.5 7.55l5.9-.85z";
+var _sid=0;
+function starSVG(n,size,col){
+  size=size||15; col=col||"currentColor";
+  var out='<svg viewBox="0 0 '+(20*4+9)+' 20" width="'+(size*4+size*0.45)+'" height="'+size+'" aria-hidden="true" style="vertical-align:-2px">';
+  for(var k=0;k<4;k++){
+    var f=Math.max(0,Math.min(1,n-k)), ox=k*23;
+    out+='<path d="'+STARPATH+'" fill="var(--star-off)" transform="translate('+ox+',0)"/>';
+    if(f>0){
+      var id="sc"+(++_sid);
+      out+='<clipPath id="'+id+'"><rect x="0" y="0" width="'+(20*f)+'" height="20"/></clipPath>';
+      out+='<path d="'+STARPATH+'" fill="'+col+'" clip-path="url(#'+id+')" transform="translate('+ox+',0)"/>';
+    }
+  }
+  return out+'</svg>';
+}
+function oneStar(f,size){
+  f=Math.max(0,Math.min(1,f));
+  var out='<svg viewBox="0 0 20 20" width="'+size+'" height="'+size+'" aria-hidden="true">';
+  out+='<path d="'+STARPATH+'" fill="var(--star-off)"/>';
+  if(f>0){
+    var id="op"+(++_sid);
+    out+='<clipPath id="'+id+'"><rect x="0" y="0" width="'+(20*f)+'" height="20"/></clipPath>';
+    out+='<path d="'+STARPATH+'" fill="currentColor" clip-path="url(#'+id+')"/>';
+  }
+  return out+'</svg>';
+}
+// --- boussole : orientation du spot, houle, vent ---
+function bxy(cx,cy,r,deg){var a=deg*Math.PI/180;return [cx+r*Math.sin(a),cy-r*Math.cos(a)];}
+// petite flèche en ligne : montre où le flux VA (deg = d'où il vient)
+function arrowGlyph(deg,col,size){
+  size=size||13;
+  return '<svg viewBox="0 0 20 20" width="'+size+'" height="'+size+'" aria-hidden="true" style="vertical-align:-2px">'+
+    '<g transform="rotate('+((deg+180)%360)+' 10 10)">'+
+    '<path d="M10 3 L10 17 M10 17 L6.5 12.5 M10 17 L13.5 12.5" fill="none" stroke="'+(col||"currentColor")+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+
+    '</g></svg>';
+}
+function compass(sp,c){
+  var cx=60,cy=60,r=43;
+  var o='<svg class="compass" viewBox="0 0 120 120" aria-label="Orientation du spot, de la houle et du vent">';
+  // arc de fenêtre de houle
+  var a0=sp[4],a1=sp[5]; if(a1<a0)a1+=360;
+  var p0=bxy(cx,cy,r,a0),p1=bxy(cx,cy,r,a1),large=(a1-a0)>180?1:0;
+  o+='<path d="M'+cx+' '+cy+' L'+p0[0].toFixed(1)+' '+p0[1].toFixed(1)+
+     ' A'+r+' '+r+' 0 '+large+' 1 '+p1[0].toFixed(1)+' '+p1[1].toFixed(1)+' Z" fill="var(--accent)" opacity=".13"/>';
+  o+='<circle cx="60" cy="60" r="'+r+'" fill="none" stroke="var(--rule)" stroke-width="1"/>';
+  ["N","E","S","O"].forEach(function(lab,k){
+    var t=bxy(cx,cy,r+9,k*90);
+    o+='<text x="'+t[0].toFixed(1)+'" y="'+(t[1]+3.5).toFixed(1)+'" text-anchor="middle" font-size="9.5" fill="var(--ink-soft)" font-family="var(--body)">'+lab+'</text>';
+  });
+  for(var d=0;d<360;d+=30){
+    var q0=bxy(cx,cy,r,d),q1=bxy(cx,cy,r-4,d);
+    o+='<line x1="'+q0[0].toFixed(1)+'" y1="'+q0[1].toFixed(1)+'" x2="'+q1[0].toFixed(1)+'" y2="'+q1[1].toFixed(1)+'" stroke="var(--rule)" stroke-width="1"/>';
+  }
+  // trait de côte : perpendiculaire à l'orientation, + repère vers le large
+  var s1=bxy(cx,cy,26,(sp[3]+90)%360), s2=bxy(cx,cy,26,(sp[3]+270)%360);
+  o+='<line x1="'+s1[0].toFixed(1)+'" y1="'+s1[1].toFixed(1)+'" x2="'+s2[0].toFixed(1)+'" y2="'+s2[1].toFixed(1)+'" stroke="var(--land-edge)" stroke-width="4" stroke-linecap="round"/>';
+  var f1=bxy(cx,cy,30,sp[3]);
+  o+='<line x1="'+cx+'" y1="'+cy+'" x2="'+f1[0].toFixed(1)+'" y2="'+f1[1].toFixed(1)+'" stroke="var(--land-edge)" stroke-width="1.6" stroke-dasharray="3 3"/>';
+  if(c){
+    // houle : de son cap vers le centre
+    var h0=bxy(cx,cy,r-3,c.dir), h1=bxy(cx,cy,12,c.dir);
+    o+='<line x1="'+h0[0].toFixed(1)+'" y1="'+h0[1].toFixed(1)+'" x2="'+h1[0].toFixed(1)+'" y2="'+h1[1].toFixed(1)+'" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>';
+    var hh=bxy(cx,cy,10,c.dir),ha=bxy(cx,cy,19,(c.dir+9)%360),hb=bxy(cx,cy,19,(c.dir+351)%360);
+    o+='<path d="M'+hh[0].toFixed(1)+' '+hh[1].toFixed(1)+' L'+ha[0].toFixed(1)+' '+ha[1].toFixed(1)+' L'+hb[0].toFixed(1)+' '+hb[1].toFixed(1)+' Z" fill="var(--accent)"/>';
+    // vent
+    var wcol=c.wcat===0?"var(--s-top)":c.wcat===3?"var(--s-bad)":"var(--s-mid)";
+    var v0=bxy(cx,cy,r-3,c.wdir), v1=bxy(cx,cy,22,c.wdir);
+    o+='<line x1="'+v0[0].toFixed(1)+'" y1="'+v0[1].toFixed(1)+'" x2="'+v1[0].toFixed(1)+'" y2="'+v1[1].toFixed(1)+'" stroke="'+wcol+'" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 2.5"/>';
+    var vh=bxy(cx,cy,20,c.wdir),va=bxy(cx,cy,28,(c.wdir+8)%360),vb=bxy(cx,cy,28,(c.wdir+352)%360);
+    o+='<path d="M'+vh[0].toFixed(1)+' '+vh[1].toFixed(1)+' L'+va[0].toFixed(1)+' '+va[1].toFixed(1)+' L'+vb[0].toFixed(1)+' '+vb[1].toFixed(1)+' Z" fill="'+wcol+'"/>';
+  }
+  return o+'</svg>';
+}
+function wetsuit(sst){
+  if(sst==null)return null;
+  if(sst>=19)return "3/2 mm, shorty possible";
+  if(sst>=16)return "3/2 mm intégrale";
+  if(sst>=13)return "4/3 mm, chaussons utiles";
+  if(sst>=10)return "4/3 mm, chaussons obligatoires";
+  return "5/4 mm, chaussons, gants et cagoule";
+}
 
-// ---------- data ----------
-var M=[],F=[],TIMES=[],DAYS=[],SUN={},TIDEBOUNDS=[],fetchedAt=null;
-var CACHE_KEY="houle-bzh-v2";
+// ---- data ----
+var M=[],F=[],TIMES=[],DAYS=[],SUN={},TB=[],fetchedAt=null,todayIdx=0;
+var CK="houle-bzh-v3", FK="houle-bzh-fav", LK="houle-bzh-log";
 
 function urls(){
   var out=[];
@@ -291,131 +450,129 @@ function urls(){
     var la=c.map(function(s){return s[1];}).join(","), lo=c.map(function(s){return s[2];}).join(",");
     out.push([
       "https://marine-api.open-meteo.com/v1/marine?latitude="+la+"&longitude="+lo+
-      "&hourly=swell_wave_height,swell_wave_direction,swell_wave_period,sea_level_height_msl"+
+      "&hourly=swell_wave_height,swell_wave_direction,swell_wave_period,secondary_swell_wave_height,secondary_swell_wave_direction,secondary_swell_wave_period,sea_level_height_msl,sea_surface_temperature"+
       "&forecast_days=10&timezone=Europe%2FParis&cell_selection=sea",
       "https://api.open-meteo.com/v1/forecast?latitude="+la+"&longitude="+lo+
-      "&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m"+
+      "&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m,temperature_2m,precipitation"+
       "&daily=sunrise,sunset&forecast_days=10&timezone=Europe%2FParis&wind_speed_unit=kn"
     ]);
   }
   return out;
 }
 function flat(j){return Array.isArray(j)?j:[j];}
-
 function load(force){
   if(!force){
-    try{
-      var raw=localStorage.getItem(CACHE_KEY);
-      if(raw){
-        var c=JSON.parse(raw);
-        if(Date.now()-c.at<3*3600*1000){ adopt(c.m,c.f,c.at); return Promise.resolve(); }
-      }
+    try{var raw=localStorage.getItem(CK);
+      if(raw){var c=JSON.parse(raw); if(Date.now()-c.at<3*3600*1000){adopt(c.m,c.f,c.at);return Promise.resolve();}}
     }catch(e){}
   }
   var U=urls();
   return Promise.all(U.map(function(p){return fetch(p[0]).then(function(r){return r.json();});}))
-    .then(function(ms){
-      return Promise.all(U.map(function(p){return fetch(p[1]).then(function(r){return r.json();});}))
-        .then(function(fs){
-          var m=[],f=[];
-          ms.forEach(function(x){flat(x).forEach(function(y){m.push(y);});});
-          fs.forEach(function(x){flat(x).forEach(function(y){f.push(y);});});
-          var at=Date.now();
-          try{localStorage.setItem(CACHE_KEY,JSON.stringify({at:at,m:m,f:f}));}catch(e){}
-          adopt(m,f,at);
-        });
-    });
+    .then(function(ms){return Promise.all(U.map(function(p){return fetch(p[1]).then(function(r){return r.json();});}))
+      .then(function(fs){
+        var m=[],f=[];
+        ms.forEach(function(x){flat(x).forEach(function(y){m.push(y);});});
+        fs.forEach(function(x){flat(x).forEach(function(y){f.push(y);});});
+        var at=Date.now();
+        try{localStorage.setItem(CK,JSON.stringify({at:at,m:m,f:f}));}catch(e){}
+        adopt(m,f,at);
+      });});
 }
 function adopt(m,f,at){
   M=m;F=f;fetchedAt=at;
-  TIMES=M[0].hourly.time;
-  DAYS=[];
+  TIMES=M[0].hourly.time; DAYS=[];
   for(var t=0;t<TIMES.length;t++){var d=TIMES[t].slice(0,10);if(DAYS.indexOf(d)<0)DAYS.push(d);}
   SUN={};
-  for(var k=0;k<DAYS.length;k++){
-    SUN[DAYS[k]]=[parseInt(F[0].daily.sunrise[k].slice(11,13),10),parseInt(F[0].daily.sunset[k].slice(11,13),10)];
-  }
-  TIDEBOUNDS=S.map(function(sp,i){
-    var per={};
-    DAYS.forEach(function(D){per[D]=[Infinity,-Infinity];});
+  for(var k=0;k<DAYS.length;k++)SUN[DAYS[k]]=[parseInt(F[0].daily.sunrise[k].slice(11,13),10),parseInt(F[0].daily.sunset[k].slice(11,13),10)];
+  TB=S.map(function(sp,i){
+    var per={};DAYS.forEach(function(D){per[D]=[Infinity,-Infinity];});
     var lv=M[i].hourly.sea_level_height_msl;
-    for(var t=0;t<TIMES.length;t++){
-      var D=TIMES[t].slice(0,10),v=lv[t];
-      if(v==null)continue;
-      if(v<per[D][0])per[D][0]=v;
-      if(v>per[D][1])per[D][1]=v;
-    }
+    for(var t=0;t<TIMES.length;t++){var D=TIMES[t].slice(0,10),v=lv[t];
+      if(v==null)continue; if(v<per[D][0])per[D][0]=v; if(v>per[D][1])per[D][1]=v;}
     return per;
   });
 }
 
-// ---------- scoring ----------
+// ---- scoring ----
+var _cc={};
 function cond(i,t){
+  var key=i+"_"+t; if(_cc[key]!==undefined)return _cc[key];
   var sp=S[i],m=M[i].hourly,w=F[i].hourly;
   var H0=m.swell_wave_height[t],dir=m.swell_wave_direction[t],T=m.swell_wave_period[t];
-  if(H0==null||T==null||dir==null)return null;
-  var D=TIMES[t].slice(0,10),b=TIDEBOUNDS[i][D];
-  var lv=m.sea_level_height_msl[t],rng=(b[1]-b[0])||1;
-  var norm=(lv-b[0])/rng;
-  var prev=m.sea_level_height_msl[Math.max(t-1,0)];
-  var rising=lv>=prev;
-  var Hs=nearshore(sp,H0,dir);
-  var face=faceOf(Hs,T);
+  if(H0==null||T==null||dir==null)return (_cc[key]=null);
+  var D=TIMES[t].slice(0,10),b=TB[i][D],lv=m.sea_level_height_msl[t],rng=(b[1]-b[0])||1;
+  var norm=(lv-b[0])/rng, prev=m.sea_level_height_msl[Math.max(t-1,0)], rising=lv>=prev;
+  var inc=angDiff(dir,sp[3]);
+  var kd=Math.pow(Math.max(Math.cos(inc*Math.PI/180),0.08),0.25);
+  var Hs=H0*sp[6]*kd, face=faceOf(Hs,T);
   var v=w.wind_speed_10m[t],wd=w.wind_direction_10m[t];
-  var off=(sp[3]+180)%360, dd=angDiff(wd,off);
-  var wcat=dd<=45?0:dd<=90?1:dd<=135?2:3;
-  var o={H0:H0,dir:dir,T:T,Hs:Hs,face:face,wind:v,wdir:wd,wcat:wcat,tide:norm,rising:rising,gust:w.wind_gusts_10m[t],score:0,fail:null};
-
-  if(!inWin(dir,sp[4],sp[5])){o.fail="fenetre";return o;}
-  if(Hs<sp[9]){o.fail="petit";return o;}
-  if(T<sp[7]){o.fail="periode";return o;}
-  if(Hs>sp[10]*1.5){o.fail="gros";return o;}
+  var off=(sp[3]+180)%360, dd=angDiff(wd,off), wcat=dd<=45?0:dd<=90?1:dd<=135?2:3;
+  // mer croisée
+  var H2=m.secondary_swell_wave_height?m.secondary_swell_wave_height[t]:null;
+  var d2=m.secondary_swell_wave_direction?m.secondary_swell_wave_direction[t]:null;
+  var T2=m.secondary_swell_wave_period?m.secondary_swell_wave_period[t]:null;
+  var cross=!!(H2!=null&&d2!=null&&T2!=null&&H2>0.45*H0&&angDiff(d2,dir)>40&&Math.abs(T2-T)>3);
+  var o={H0:H0,dir:dir,T:T,Hs:Hs,face:face,wind:v,wdir:wd,wcat:wcat,tide:norm,rising:rising,rng:rng,
+    gust:w.wind_gusts_10m[t],air:w.temperature_2m[t],rain:w.precipitation[t],
+    sst:m.sea_surface_temperature?m.sea_surface_temperature[t]:null,
+    cross:cross,score:0,fail:null,tideScore:0};
+  if(!inWin(dir,sp[4],sp[5])){o.fail="fenetre";return (_cc[key]=o);}
+  if(Hs<sp[9]){o.fail="petit";return (_cc[key]=o);}
+  if(T<sp[7]){o.fail="periode";return (_cc[key]=o);}
+  if(Hs>sp[10]*1.5){o.fail="gros";return (_cc[key]=o);}
   var wp;
   if(v<5)wp=5.5;
   else if(dd<=45)wp=v<=12?6:v<=20?5:v<=28?3:1;
   else if(dd<=90)wp=v<=12?4:v<=20?3:1.5;
   else if(dd<=135)wp=v<10?2:v<=18?1:0;
-  else {if(v>15){o.fail="vent";return o;} wp=v<8?2:0.5;}
-  if(o.gust>40){o.fail="vent";return o;}
+  else {if(v>15){o.fail="vent";return (_cc[key]=o);} wp=v<8?2:0.5;}
+  if(o.gust>40){o.fail="vent";return (_cc[key]=o);}
   var pts=(Hs>=sp[9]*1.25&&Hs<=sp[10]*0.8)?6:(Hs<=sp[10]?4:3);
   pts+=T<8?0:T<10?1.5:T<12?2.5:T<14?3.5:4;
-  var ts=tideScore(sp[8],norm,rising);
+  var ts=tideScore(sp[8],norm,rising); o.tideScore=ts;
   pts+=wp+ts;
-  if(sp[12]&&ts>=4&&T>=11)pts+=1;
-  o.score=Math.round(pts*10)/10;
-  o.tideScore=ts;
-  return o;
+  if(sp[11]&&ts>=4&&T>=11)pts+=1;
+  if(cross)pts-=1.5;
+  o.score=Math.round(pts*10)/10; o.st=stars(o.score);
+  return (_cc[key]=o);
 }
 function idxOf(day,hour){
   var D=DAYS[day];
   for(var t=0;t<TIMES.length;t++) if(TIMES[t].slice(0,10)===D && +TIMES[t].slice(11,13)===hour) return t;
   return -1;
 }
+function dayHours(day){var sr=SUN[DAYS[day]];return [Math.max(sr[0],5),Math.min(sr[1],22)];}
 function bestHour(i,day){
-  var sr=SUN[DAYS[day]],best=null;
-  for(var h=Math.max(sr[0],5);h<=Math.min(sr[1],22);h++){
-    var t=idxOf(day,h); if(t<0)continue;
-    var c=cond(i,t); if(!c||c.score<9)continue;
-    if(!best||c.score>best.score)best={hour:h,score:c.score,c:c};
-  }
+  var r=dayHours(day),best=null;
+  for(var h=r[0];h<=r[1];h++){var t=idxOf(day,h);if(t<0)continue;
+    var c=cond(i,t); if(!c||c.fail||c.score<9)continue;
+    if(!best||c.score>best.score)best={hour:h,score:c.score,st:c.st,c:c};}
   return best;
 }
 function dayPeak(day){
-  var sr=SUN[DAYS[day]],peak=0;
-  for(var h=Math.max(sr[0],5);h<=Math.min(sr[1],22);h++){
-    var t=idxOf(day,h); if(t<0)continue;
-    for(var i=0;i<S.length;i++){var c=cond(i,t); if(c&&c.score>peak)peak=c.score;}
-  }
-  return peak;
-}
-function hourPeak(day,h){
-  var t=idxOf(day,h); if(t<0)return 0;
-  var p=0;
-  for(var i=0;i<S.length;i++){var c=cond(i,t); if(c&&c.score>p)p=c.score;}
+  var r=dayHours(day),p=0;
+  for(var h=r[0];h<=r[1];h++){var t=idxOf(day,h);if(t<0)continue;
+    for(var i=0;i<S.length;i++){var c=cond(i,t);if(c&&!c.fail&&c.score>p)p=c.score;}}
   return p;
 }
+function hourPeak(day,h){
+  var t=idxOf(day,h);if(t<0)return 0;var p=0;
+  for(var i=0;i<S.length;i++){var c=cond(i,t);if(c&&!c.fail&&c.score>p)p=c.score;}
+  return p;
+}
+function weekBest(){
+  var best=null;
+  for(var d=todayIdx;d<DAYS.length;d++){
+    var r=dayHours(d);
+    for(var h=r[0];h<=r[1];h++){var t=idxOf(d,h);if(t<0)continue;
+      for(var i=0;i<S.length;i++){var c=cond(i,t);
+        if(c&&!c.fail&&(!best||c.score>best.score))best={i:i,d:d,h:h,score:c.score,st:c.st};}}
+  }
+  return best;
+}
+function conf(d){var k=d-todayIdx;return k<=3?"high":k<=6?"mid":"low";}
 
-// ---------- colour ----------
+// ---- couleur ----
 function colFor(c){
   if(!c)return "var(--s-none)";
   if(c.fail==="vent"||c.fail==="gros")return "var(--s-bad)";
@@ -423,38 +580,54 @@ function colFor(c){
   if(c.score<9)return "var(--s-bad)";
   return c.score>=16?"var(--s-top)":c.score>=14?"var(--s-good)":c.score>=12?"var(--s-mid)":"var(--s-low)";
 }
-function tagFor(s){return s>=15?"À ne pas rater":s>=12?"Vaut le déplacement":"Surfable, sans plus";}
+function colStars(st){return st>=3.5?"var(--s-top)":st>=3?"var(--s-good)":st>=2?"var(--s-mid)":st>0?"var(--s-low)":"var(--s-none)";}
+function tagFor(st){return st>=3.5?"À ne pas rater":st>=3?"Vaut le déplacement":st>=2?"Correct":"Surfable, sans plus";}
 
-// ---------- wording ----------
+// ---- texte ----
 function analysis(i,t){
   var sp=S[i],c=cond(i,t);
   if(!c)return "Pas de donnée à cette heure.";
   if(c.fail==="fenetre")return "La houle vient du "+bearingWord(c.dir)+" et ce spot regarde au "+bearingWord(sp[3])+" : elle passe devant sans rentrer. Fenêtre utile "+sp[4]+"–"+sp[5]+"°.";
   if(c.fail==="petit")return "Il n'y a que "+nf(c.Hs.toFixed(1))+" m de houle au spot, sous le seuil de "+nf(sp[9])+" m. Rien à lever.";
-  if(c.fail==="periode")return nf(c.T.toFixed(0))+" s de période : c'est de la mer du vent, pas de la houle. Court, désordonné, sans puissance, même si la hauteur paraît correcte.";
-  if(c.fail==="vent")return "Il y a de la vague — environ "+nf(c.face.toFixed(1))+" m de face — mais le vent de "+Math.round(c.wind)+" nœuds est dedans. La surface sera hachée.";
+  if(c.fail==="periode")return Math.round(c.T)+" s de période : c'est de la mer du vent, pas de la houle. Court, désordonné, sans puissance, même si la hauteur paraît correcte.";
+  if(c.fail==="vent")return "Il y a de la vague, environ "+nf(c.face.toFixed(1))+" m de face, mais le vent de "+Math.round(c.wind)+" nœuds est dedans. La surface sera hachée.";
   if(c.fail==="gros")return "Trop gros : "+nf(c.face.toFixed(1))+" m de face, bien au-delà de ce que ce spot tient. Cherche un abri au fond d'une baie.";
   var p=[];
-  p.push("<strong>"+nf(c.face.toFixed(1))+" m de face</strong> (houle "+nf(c.Hs.toFixed(1))+" m à "+nf(c.T.toFixed(0))+" s), vent de "+Math.round(c.wind)+" nœud"+(c.wind>=2?"s":"")+" "+WCAT[c.wcat]+", "+tideWord(c.tide,c.rising)+".");
+  p.push("<strong>"+nf(c.face.toFixed(1))+" m de face</strong> (houle "+nf(c.Hs.toFixed(1))+" m à "+Math.round(c.T)+" s), vent de "+Math.round(c.wind)+" nœud"+(c.wind>=2?"s":"")+" "+WCAT[c.wcat]+", "+tideWord(c.tide,c.rising)+".");
   if(c.wcat===0&&c.wind<=10)p.push("Vent offshore et faible : creux et bien tenu.");
   else if(c.wcat===0)p.push("Offshore mais soutenu : ça tiendra la lèvre, en plus musclé.");
   else if(c.wcat===3)p.push("Vent onshore : la surface restera brouillonne malgré la taille.");
-  else if(c.wind>=18)p.push("Vent fort, ça va travailler la surface même dans le bon axe.");
+  else if(c.wind>=18)p.push("Vent fort, ça travaillera la surface même dans le bon axe.");
+  if(c.cross)p.push("<strong>Mer croisée</strong> : une seconde houle arrive sous un autre angle et avec une autre période. Attends-toi à des pics désordonnés et à des séries qui se contrarient.");
   if(c.T>=13)p.push("Période longue : les séries arriveront nettement au-dessus de cette moyenne.");
-  if(c.tideScore>=4&&sp[12])p.push("La marée place le shore dans sa fenêtre — c'est le moment pour le bodyboard.");
+  if(c.tideScore>=4&&sp[11])p.push("La marée place le shore dans sa fenêtre — c'est le moment pour le bodyboard.");
   else if(c.tideScore<=1)p.push("La marée n'est pas dans la fenêtre du spot ("+TIDE[sp[8]]+") : ça bridera la qualité.");
+  if(c.rng>=6)p.push("Fort marnage ("+c.rng.toFixed(1).replace(".",",")+" m) : le courant sera un vrai facteur et la fenêtre défilera vite.");
   if(c.Hs>sp[10])p.push("Au-dessus du plafond habituel du spot : engagé, courants à prendre au sérieux.");
   return p.join(" ");
 }
 
-// ---------- state ----------
-var day=0,hour=10,sel=null;
+// ---- état ----
+var day=0,hour=10,sel=null,minStars=0,favOnly=false,tab="map",logOpen=false,logStars=0,logReasons=[];
+var FAV={},LOG=[];
+try{FAV=JSON.parse(localStorage.getItem(FK)||"{}");}catch(e){FAV={};}
+try{LOG=JSON.parse(localStorage.getItem(LK)||"[]");}catch(e){LOG=[];}
+function saveFav(){try{localStorage.setItem(FK,JSON.stringify(FAV));}catch(e){}}
+function saveLog(){try{localStorage.setItem(LK,JSON.stringify(LOG));}catch(e){}}
 
-// ---------- map ----------
-var NS="http://www.w3.org/2000/svg",svg=document.getElementById("map"),dots=[];
+function visible(i){
+  if(favOnly&&!FAV[i])return false;
+  if(minStars>0){var b=bestHour(i,day); if(!b||b.st<minStars)return false;}
+  return true;
+}
+
+// ---- carte ----
+var NS="http://www.w3.org/2000/svg",svg=document.getElementById("map");
+var view={x:0,y:0,w:W,h:H},markers=null;
 function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+function applyView(){svg.setAttribute("viewBox",view.x+" "+view.y+" "+view.w+" "+view.h);}
 function drawBase(){
-  svg.appendChild(el("rect",{x:0,y:0,width:W,height:H,fill:"var(--sea)"}));
+  svg.appendChild(el("rect",{x:-2000,y:-2000,width:6000,height:6000,fill:"var(--sea)"}));
   var g=el("g",{opacity:".45"});
   for(var k=1;k<=3;k++) g.appendChild(el("rect",{x:0,y:0,width:W*(0.10+0.06*k),height:H,fill:"var(--sea-deep)",opacity:".25"}));
   svg.appendChild(g);
@@ -465,154 +638,388 @@ function drawBase(){
   [[48.72,-4.15,"Léon"],[48.30,-4.30,"Crozon"],[48.12,-4.12,"Douarnenez"],[47.93,-4.18,"Audierne"],[47.80,-3.95,"Sud Finistère"],[47.56,-2.99,"Quiberon"]].forEach(function(z){
     var t=el("text",{x:px(z[1]),y:py(z[0]),class:"zlab","text-anchor":"middle"});t.textContent=z[2];svg.appendChild(t);
   });
-  var layer=el("g",{});svg.appendChild(layer);
-  S.forEach(function(sp,i){
-    var g2=el("g",{class:"dot","data-i":i,tabindex:"0",role:"button"});
-    var x=px(sp[2]),y=py(sp[1]);
-    g2.appendChild(el("circle",{class:"halo",cx:x,cy:y,r:11}));
-    var c=el("circle",{cx:x,cy:y,r:7,stroke:"var(--chrome)","stroke-width":1.5});
-    g2.appendChild(c);
-    g2.appendChild(el("circle",{cx:x,cy:y,r:15,fill:"transparent"}));
-    var ti=el("title");ti.textContent=sp[0];g2.appendChild(ti);
-    g2.addEventListener("click",function(){sel=i;render();});
-    g2.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();sel=i;render();}});
-    layer.appendChild(g2);
-    dots.push(c);
+  markers=el("g",{});svg.appendChild(markers);
+  applyView();
+}
+function pxPerUnit(){var r=svg.getBoundingClientRect();return r.width? r.width/view.w : 1;}
+function renderMarkers(){
+  while(markers.firstChild)markers.removeChild(markers.firstChild);
+  var t=idxOf(day,hour); if(t<0)return;
+  var scale=pxPerUnit(), cell=42/scale, groups={};
+  for(var i=0;i<S.length;i++){
+    if(!visible(i))continue;
+    var x=px(S[i][2]),y=py(S[i][1]);
+    var k=Math.floor(x/cell)+"_"+Math.floor(y/cell);
+    (groups[k]=groups[k]||[]).push(i);
+  }
+  var rr=Math.max(0.55,1/scale);
+  Object.keys(groups).forEach(function(k){
+    var g=groups[k];
+    if(g.length===1){
+      var i=g[0],c=cond(i,t),x=px(S[i][2]),y=py(S[i][1]);
+      var node=el("g",{class:"dot","data-i":i,tabindex:"0",role:"button","data-sel":sel===i?"1":"0"});
+      node.appendChild(el("circle",{class:"halo",cx:x,cy:y,r:11*rr}));
+      var good=c&&!c.fail&&c.score>=9;
+      node.appendChild(el("circle",{cx:x,cy:y,r:(good?(c.score>=14?8.5:7.5):5.5)*rr,fill:colFor(c),stroke:"var(--chrome)","stroke-width":1.5*rr}));
+      if(FAV[i])node.appendChild(el("circle",{cx:x,cy:y,r:12*rr,fill:"none",stroke:"var(--s-mid)","stroke-width":1.6*rr}));
+      node.appendChild(el("circle",{cx:x,cy:y,r:16*rr,fill:"transparent"}));
+      var ti=el("title");ti.textContent=S[i][0];node.appendChild(ti);
+      node.addEventListener("click",function(){sel=i;render();});
+      node.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();sel=i;render();}});
+      markers.appendChild(node);
+    }else{
+      var bx=0,by=0,bestc=null;
+      g.forEach(function(i){bx+=px(S[i][2]);by+=py(S[i][1]);
+        var c=cond(i,t); if(c&&!c.fail&&(!bestc||c.score>bestc.score))bestc=c;});
+      bx/=g.length;by/=g.length;
+      var node2=el("g",{class:"clu",tabindex:"0",role:"button"});
+      node2.appendChild(el("circle",{cx:bx,cy:by,r:13*rr,fill:bestc?colFor(bestc):"var(--s-none)",stroke:"var(--chrome)","stroke-width":1.8*rr}));
+      var tx=el("text",{x:bx,y:by+4*rr,"text-anchor":"middle","font-size":(11*rr)});tx.textContent=g.length;
+      node2.appendChild(tx);
+      var ti2=el("title");ti2.textContent=g.map(function(i){return S[i][0];}).join(", ");node2.appendChild(ti2);
+      node2.addEventListener("click",function(){zoomTo(g);});
+      markers.appendChild(node2);
+    }
   });
 }
+function zoomTo(list){
+  var xs=list.map(function(i){return px(S[i][2]);}),ys=list.map(function(i){return py(S[i][1]);});
+  var x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs),y0=Math.min.apply(null,ys),y1=Math.max.apply(null,ys);
+  var w=Math.max(x1-x0,40)*2.6,h=Math.max(y1-y0,40)*2.6,s=Math.max(w/W,h/H);
+  view.w=W*s;view.h=H*s;
+  view.x=(x0+x1)/2-view.w/2; view.y=(y0+y1)/2-view.h/2;
+  clampView();applyView();renderMarkers();
+}
+function clampView(){
+  var minW=W*0.10;
+  if(view.w<minW){var r=minW/view.w;view.w=minW;view.h=H*(minW/W);}
+  if(view.w>W){view.w=W;view.h=H;}
+  view.x=Math.max(-W*0.25,Math.min(view.x,W-view.w+W*0.25));
+  view.y=Math.max(-H*0.25,Math.min(view.y,H-view.h+H*0.25));
+}
+function zoomAt(f,cx,cy){
+  var nx=cx-(cx-view.x)*f, ny=cy-(cy-view.y)*f;
+  view.w*=f;view.h*=f;view.x=nx;view.y=ny;clampView();applyView();renderMarkers();
+}
+(function mapGestures(){
+  var pts={},last=null,startDist=0,startView=null,moved=false;
+  svg.addEventListener("pointerdown",function(e){
+    svg.setPointerCapture(e.pointerId); pts[e.pointerId]={x:e.clientX,y:e.clientY};
+    moved=false;
+    if(Object.keys(pts).length===1){last={x:e.clientX,y:e.clientY};svg.classList.add("drag");}
+    else if(Object.keys(pts).length===2){
+      var k=Object.keys(pts),a=pts[k[0]],b=pts[k[1]];
+      startDist=Math.hypot(a.x-b.x,a.y-b.y);startView={w:view.w,h:view.h,x:view.x,y:view.y};
+    }
+  });
+  svg.addEventListener("pointermove",function(e){
+    if(!pts[e.pointerId])return;
+    pts[e.pointerId]={x:e.clientX,y:e.clientY};
+    var keys=Object.keys(pts);
+    if(keys.length===1&&last){
+      var s=pxPerUnit();
+      var dx=(e.clientX-last.x)/s,dy=(e.clientY-last.y)/s;
+      if(Math.abs(e.clientX-last.x)+Math.abs(e.clientY-last.y)>2)moved=true;
+      view.x-=dx;view.y-=dy;last={x:e.clientX,y:e.clientY};clampView();applyView();
+    }else if(keys.length===2&&startView){
+      var a=pts[keys[0]],b=pts[keys[1]],d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(startDist>0){
+        var f=startDist/d; moved=true;
+        var r=svg.getBoundingClientRect();
+        var mx=((a.x+b.x)/2-r.left)/r.width*startView.w+startView.x;
+        var my=((a.y+b.y)/2-r.top)/r.height*startView.h+startView.y;
+        view.w=startView.w*f;view.h=startView.h*f;
+        view.x=mx-(mx-startView.x)*f; view.y=my-(my-startView.y)*f;
+        clampView();applyView();
+      }
+    }
+  });
+  function up(e){delete pts[e.pointerId];if(!Object.keys(pts).length){last=null;startView=null;svg.classList.remove("drag");if(moved)renderMarkers();}}
+  svg.addEventListener("pointerup",up); svg.addEventListener("pointercancel",up);
+  svg.addEventListener("wheel",function(e){
+    e.preventDefault();
+    var r=svg.getBoundingClientRect();
+    var mx=(e.clientX-r.left)/r.width*view.w+view.x, my=(e.clientY-r.top)/r.height*view.h+view.y;
+    zoomAt(e.deltaY>0?1.15:0.87,mx,my);
+  },{passive:false});
+})();
 
-// ---------- render ----------
+// ---- rendu ----
 var DN=["dim","lun","mar","mer","jeu","ven","sam"];
+function renderVerdict(){
+  var b=document.getElementById("verdict"),wb=weekBest();
+  if(!wb){
+    b.disabled=true;
+    b.innerHTML='<div class="vlab">Les dix prochains jours</div><div class="vmain"><span class="vspot">Rien de surfable</span></div>'+
+      '<div class="vtoday">Aucun des 57 spots n\'atteint son seuil sur toute la fenêtre de prévision.</div>';
+    return;
+  }
+  b.disabled=false;
+  var dt=new Date(DAYS[wb.d]+"T12:00:00");
+  var when=(wb.d===todayIdx?"aujourd'hui":dt.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"short"}))+" · "+wb.h+"h";
+  var tb=null,ti=null;
+  for(var i=0;i<S.length;i++){var x=bestHour(i,todayIdx);if(x&&(!tb||x.score>tb.score)){tb=x;ti=i;}}
+  b.innerHTML='<div class="vlab">Meilleur des dix prochains jours</div>'+
+    '<div class="vmain"><span class="vspot">'+S[wb.i][0]+'</span>'+starSVG(wb.st,16,colStars(wb.st))+'<span class="vwhen">'+when+'</span></div>'+
+    '<div class="vtoday">Aujourd\'hui : '+(tb?('<b>'+S[ti][0]+'</b> '+starSVG(tb.st,12,colStars(tb.st))+' vers '+tb.hour+'h'):'rien de surfable')+'</div>';
+  b.onclick=function(){day=wb.d;hour=wb.h;sel=wb.i;render();window.scrollTo({top:0,behavior:"smooth"});};
+}
 function renderDays(){
   var box=document.getElementById("days");box.innerHTML="";
   DAYS.forEach(function(D,d){
-    var dt=new Date(D+"T12:00:00");
-    var b=document.createElement("button");
-    b.className="day";b.type="button";
+    var dt=new Date(D+"T12:00:00"),b=document.createElement("button");
+    b.className="day conf-"+conf(d); b.type="button";
     b.setAttribute("aria-pressed",d===day?"true":"false");
-    var pk=dayPeak(d);
-    var col=pk===0?"var(--s-none)":pk>=16?"var(--s-top)":pk>=14?"var(--s-good)":pk>=12?"var(--s-mid)":"var(--s-low)";
-    b.innerHTML='<span class="dn">'+DN[dt.getDay()]+'</span><span class="dd">'+dt.getDate()+'/'+(dt.getMonth()+1)+
-      '</span><span class="db" style="background:'+col+'">'+(pk===0?"plat":nf(pk.toFixed(1)))+'</span>';
+    var st=stars(dayPeak(d));
+    b.innerHTML='<span class="dn">'+(d===todayIdx?"auj.":DN[dt.getDay()])+'</span><span class="dd">'+dt.getDate()+'/'+(dt.getMonth()+1)+
+      '</span><span class="dstars">'+(st>0?starSVG(st,11,colStars(st)):'<span style="font-size:10.5px;color:var(--ink-soft)">plat</span>')+'</span>';
     b.addEventListener("click",function(){day=d;clampHour();render();});
     box.appendChild(b);
   });
 }
 function clampHour(){
-  var sr=SUN[DAYS[day]];
-  var lo=Math.max(sr[0],5),hi=Math.min(sr[1],22);
-  var sl=document.getElementById("slide");
-  sl.min=lo;sl.max=hi;
-  if(hour<lo)hour=lo; if(hour>hi)hour=hi;
+  var r=dayHours(day),sl=document.getElementById("slide");
+  sl.min=r[0];sl.max=r[1];
+  if(hour<r[0])hour=r[0]; if(hour>r[1])hour=r[1];
   sl.value=hour;
 }
 function renderSpark(){
   var s=document.getElementById("spark");s.innerHTML="";
-  var sr=SUN[DAYS[day]],lo=Math.max(sr[0],5),hi=Math.min(sr[1],22),n=hi-lo;
-  var vals=[];for(var h=lo;h<=hi;h++)vals.push(hourPeak(day,h));
-  var max=Math.max(20,Math.max.apply(null,vals));
+  var r=dayHours(day),n=r[1]-r[0],vals=[];
+  for(var h=r[0];h<=r[1];h++)vals.push(hourPeak(day,h));
   var w=600/(n+1);
   vals.forEach(function(v,k){
-    var hh=lo+k;
-    var bh=v/max*44;
-    var col=v===0?"var(--s-none)":v>=16?"var(--s-top)":v>=14?"var(--s-good)":v>=12?"var(--s-mid)":v>=9?"var(--s-low)":"var(--s-bad)";
-    s.appendChild(el("rect",{x:k*w+1.5,y:50-bh,width:w-3,height:Math.max(bh,2),fill:col,opacity:hh===hour?"1":".45",rx:1}));
+    var hh=r[0]+k,st=stars(v),bh=v/20*44;
+    s.appendChild(el("rect",{x:k*w+1.5,y:50-bh,width:w-3,height:Math.max(bh,2),fill:st>0?colStars(st):"var(--s-none)",opacity:hh===hour?"1":".42",rx:1}));
     if(hh%3===0){var t=el("text",{x:k*w+w/2,y:59,"text-anchor":"middle","font-size":"9",fill:"var(--ink-soft)","font-family":"var(--mono)"});t.textContent=hh;s.appendChild(t);}
-  });
-}
-function renderDots(){
-  var t=idxOf(day,hour);
-  S.forEach(function(sp,i){
-    var c=t<0?null:cond(i,t);
-    dots[i].setAttribute("fill",colFor(c));
-    dots[i].setAttribute("r",(c&&!c.fail&&c.score>=9)?(c.score>=14?8.5:7.5):5.5);
-    dots[i].parentNode.setAttribute("data-sel",sel===i?"1":"0");
   });
 }
 function renderRank(){
   var ol=document.getElementById("rank");ol.innerHTML="";
   document.getElementById("rankh").textContent="Classement à "+hour+"h";
   var t=idxOf(day,hour),list=[];
-  if(t>=0)for(var i=0;i<S.length;i++){var c=cond(i,t);if(c&&!c.fail&&c.score>=9)list.push([i,c]);}
+  if(t>=0)for(var i=0;i<S.length;i++){if(!visible(i))continue;var c=cond(i,t);if(c&&!c.fail&&c.score>=9)list.push([i,c]);}
   list.sort(function(a,b){return b[1].score-a[1].score;});
   if(!list.length){
     var li=document.createElement("li");li.style.cursor="default";
-    var pk=dayPeak(day);
-    li.innerHTML='<span class="nm">'+(pk===0?"Rien de surfable ce jour-là.":"Rien à cette heure — le jour culmine à "+nf(pk.toFixed(1))+".")+'</span>';
+    var pk=stars(dayPeak(day));
+    li.innerHTML='<span class="nm">'+(pk===0?"Rien de surfable ce jour-là.":"Rien à cette heure — la journée culmine ailleurs.")+'</span>';
     ol.appendChild(li);return;
   }
-  list.slice(0,10).forEach(function(r){
-    var i=r[0],c=r[1],bh=bestHour(i,day);
-    var li=document.createElement("li");
-    li.innerHTML='<i style="background:'+colFor(c)+'"></i><span class="nm">'+S[i][0]+'</span>'+
-      '<span class="hh">'+(bh?"idéal "+bh.hour+"h":"")+'</span><span class="sc">'+nf(c.score.toFixed(1))+'</span>';
+  list.slice(0,12).forEach(function(r){
+    var i=r[0],c=r[1],bh=bestHour(i,day),li=document.createElement("li");
+    li.innerHTML='<i class="pip" style="background:'+colFor(c)+'"></i><span class="nm">'+(FAV[i]?"★ ":"")+S[i][0]+'</span>'+
+      '<span class="hh">'+(bh?"idéal "+bh.hour+"h":"")+'</span>'+starSVG(c.st,12,colStars(c.st));
     li.addEventListener("click",function(){sel=i;render();});
     ol.appendChild(li);
   });
 }
+function tideCurve(i){
+  var r=dayHours(day),sp=S[i],out='<svg class="tidecurve" viewBox="0 0 300 56" preserveAspectRatio="none" aria-hidden="true">';
+  var w=TWIN[sp[8]],pts=[],lo=r[0]-2,hi=r[1]+2;
+  // zone de marée favorable
+  for(var h=lo;h<=hi;h++){
+    var t=idxOf(day,h); if(t<0)continue;
+    var c=cond(i,t); if(!c)continue;
+    var x=(h-lo)/(hi-lo)*300, y=44-c.tide*34;
+    pts.push([x,y,c.tide,c.rising,h]);
+  }
+  if(!pts.length)return "";
+  pts.forEach(function(p,k){
+    if(k===0)return;
+    var q=pts[k-1], ok=(sp[8]==="toutes")||(p[2]>=w[0]&&p[2]<=w[1]&&!(sp[8]==="mimontante"&&!p[3]));
+    out+='<line x1="'+q[0]+'" y1="'+q[1]+'" x2="'+p[0]+'" y2="'+p[1]+'" stroke="'+(ok?"var(--accent)":"var(--rule)")+'" stroke-width="'+(ok?2.4:1.6)+'" stroke-linecap="round"/>';
+  });
+  var cur=pts.filter(function(p){return p[4]===hour;})[0];
+  if(cur)out+='<circle cx="'+cur[0]+'" cy="'+cur[1]+'" r="3.4" fill="var(--accent)"/>';
+  out+='<text x="2" y="54" font-size="8" fill="var(--ink-soft)" font-family="var(--mono)">'+lo+'h</text>';
+  out+='<text x="298" y="54" font-size="8" fill="var(--ink-soft)" font-family="var(--mono)" text-anchor="end">'+hi+'h</text>';
+  out+='<text x="150" y="54" font-size="8" fill="var(--ink-soft)" text-anchor="middle">fenêtre '+TIDE[sp[8]]+'</text>';
+  return out+'</svg>';
+}
+function hourCurve(i){
+  var r=dayHours(day),n=r[1]-r[0],out='<svg class="hcurve" viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true">',w=300/(n+1);
+  for(var h=r[0];h<=r[1];h++){
+    var t=idxOf(day,h),c=t<0?null:cond(i,t),v=(c&&!c.fail)?c.score:0,st=stars(v),bh=v/20*34;
+    out+='<rect x="'+((h-r[0])*w+1)+'" y="'+(38-bh)+'" width="'+(w-2)+'" height="'+Math.max(bh,1.5)+'" fill="'+(st>0?colStars(st):"var(--s-none)")+'" opacity="'+(h===hour?1:.4)+'" rx="1"/>';
+    if(h%3===0)out+='<text x="'+((h-r[0])*w+w/2)+'" y="45" text-anchor="middle" font-size="7.5" fill="var(--ink-soft)" font-family="var(--mono)">'+h+'</text>';
+  }
+  return out+'</svg>';
+}
 function renderPanel(){
   var p=document.getElementById("panel");
   if(sel===null){
-    var pk=dayPeak(day);
+    var pk=stars(dayPeak(day));
     p.innerHTML='<h2 class="ph">'+(pk===0?"Journée plate":"Choisis un spot")+'</h2><p class="pz">'+
       new Date(DAYS[day]+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})+'</p>'+
-      '<p class="hint">'+(pk===0?"Aucun des 57 spots n'atteint son seuil. Touche une pastille pour voir ce qui manque.":"Touche une pastille ou une ligne du classement. Le curseur au-dessus fait défiler la journée heure par heure.")+'</p>';
+      '<p class="hint">'+(pk===0?"Aucun des 57 spots n'atteint son seuil. Touche une pastille pour voir ce qui manque.":"Touche une pastille ou une ligne du classement. Le curseur fait défiler la journée heure par heure, et la carte se zoome au doigt.")+'</p>';
     return;
   }
   var sp=S[sel],t=idxOf(day,hour),c=t<0?null:cond(sel,t),bh=bestHour(sel,day);
-  var html='<h2 class="ph">'+sp[0]+'</h2><p class="pz">'+ZONES[sp[13]]+'</p>';
-  var col=colFor(c);
-  if(c&&!c.fail&&c.score>=9){
-    html+='<div class="verdict"><span class="score" style="color:'+col+'">'+nf(c.score.toFixed(1))+'<small>/20</small></span>'+
-      '<span class="tag" style="background:'+col+'">'+tagFor(c.score)+'</span></div>';
+  var html='<div class="phrow"><div><h2 class="ph">'+sp[0]+'</h2><p class="pz">'+ZONES[sp[12]]+'</p></div>'+
+    '<button class="fav" id="favbtn" type="button" aria-pressed="'+(FAV[sel]?"true":"false")+'" aria-label="Favori">'+
+    '<svg viewBox="0 0 20 20" width="22" height="22"><path d="'+STARPATH+'" fill="currentColor"/></svg></button></div>';
+  var good=c&&!c.fail&&c.score>=9;
+  if(good){
+    html+='<div class="vrow">'+starSVG(c.st,19,colStars(c.st))+'<span class="tag" style="background:'+colStars(c.st)+'">'+tagFor(c.st)+'</span></div>';
   }else{
     var lbl=(c&&(c.fail==="vent"||c.fail==="gros"))?"Vagues inexploitables":"Pas de vague";
-    html+='<div class="verdict"><span class="score" style="color:'+col+'">—</span><span class="tag" style="background:'+col+'">'+lbl+'</span></div>';
+    html+='<div class="vrow">'+starSVG(0,19)+'<span class="tag" style="background:'+colFor(c)+'">'+lbl+'</span></div>';
   }
-  if(bh){
-    html+='<div class="best">Meilleure heure : <b>'+bh.hour+'h</b> · <b>'+nf(bh.score.toFixed(1))+'/20</b>'+
-      (bh.hour!==hour?'<button type="button" id="goBest">y aller</button>':'')+'</div>';
-  }
+  if(conf(day)!=="high")html+='<div class="warn">Prévision à J+'+(day-todayIdx)+' : '+(conf(day)==="mid"?"une tendance, à reconfirmer 48 h avant.":"purement indicatif, ne engage rien dessus.")+'</div>';
+  if(bh)html+='<div class="best">Meilleure heure : <b>'+bh.hour+'h</b> '+starSVG(bh.st,13,colStars(bh.st))+(bh.hour!==hour?'<button type="button" id="goBest">y aller</button>':'')+'</div>';
   if(c){
     html+='<dl class="grid">'+
       '<div class="cell"><dt>Taille de face</dt><dd>'+nf(c.face.toFixed(1))+' m</dd></div>'+
-      '<div class="cell"><dt>Houle au spot</dt><dd>'+nf(c.Hs.toFixed(1))+' m <em>'+Math.round(c.dir)+'°</em></dd></div>'+
-      '<div class="cell"><dt>Période</dt><dd>'+Math.round(c.T)+' s</dd></div>'+
-      '<div class="cell"><dt>Vent</dt><dd>'+Math.round(c.wind)+' kn <em>'+WCAT[c.wcat]+'</em></dd></div>'+
+      '<div class="cell"><dt>Houle au spot</dt><dd>'+nf(c.Hs.toFixed(1))+' m <em>'+arrowGlyph(c.dir,"var(--accent)",12)+' '+Math.round(c.dir)+'°</em></dd></div>'+
+      '<div class="cell"><dt>Période</dt><dd>'+Math.round(c.T)+' s'+(c.cross?' <em>croisée</em>':'')+'</dd></div>'+
+      '<div class="cell"><dt>Vent</dt><dd>'+Math.round(c.wind)+' kn <em>'+arrowGlyph(c.wdir,(c.wcat===0?"var(--s-top)":c.wcat===3?"var(--s-bad)":"var(--s-mid)"),12)+' '+WCAT[c.wcat]+'</em></dd></div>'+
       '</dl>';
-    html+=hourCurve(sel);
+    html+='<div class="sect">Orientation</div><div class="comprow">'+compass(sp,c)+
+      '<div class="complegend">'+
+      '<div><i class="sw shore"></i>Le spot regarde au <b>'+bearingWord(sp[3])+'</b> ('+sp[3]+'°). La zone claire est sa fenêtre de houle.</div>'+
+      '<div><i class="sw swell"></i>Houle du <b>'+bearingWord(c.dir)+'</b> ('+Math.round(c.dir)+'°)'+(inWin(c.dir,sp[4],sp[5])?', dans la fenêtre':', <b>hors fenêtre</b>')+'.</div>'+
+      '<div><i class="sw wind" style="background:'+(c.wcat===0?"var(--s-top)":c.wcat===3?"var(--s-bad)":"var(--s-mid)")+'"></i>Vent du <b>'+bearingWord(c.wdir)+'</b> ('+Math.round(c.wdir)+'°), '+WCAT[c.wcat]+'.</div>'+
+      '<div class="cnote">Les flèches montrent où va le flux, pas d\'où il vient.</div>'+
+      '</div></div>';
+    html+='<div class="sect">Heure par heure</div>'+hourCurve(sel);
+    html+='<div class="sect">Marée</div>'+tideCurve(sel);
+    var ws=wetsuit(c.sst);
+    html+='<p class="kit">'+(c.sst!=null?'Eau <b>'+Math.round(c.sst)+'°</b> · ':'')+'air <b>'+Math.round(c.air)+'°</b>'+
+      (c.rain>0.2?' · pluie <b>'+nf(c.rain.toFixed(1))+' mm</b>':' · sec')+
+      (ws?'<br>Combinaison : <b>'+ws+'</b>':'')+'</p>';
   }
   html+='<p class="analysis">'+analysis(sel,t)+'</p>';
   html+='<div class="meta"><span>Orientation <b>'+sp[3]+'°</b></span><span>Fenêtre <b>'+sp[4]+'–'+sp[5]+'°</b></span>'+
     '<span>Marée <b>'+TIDE[sp[8]]+'</b></span><span>Taille utile <b>'+nf(sp[9])+'–'+nf(sp[10])+' m</b></span></div>';
-  p.innerHTML=html;
-  var gb=document.getElementById("goBest");
-  if(gb)gb.addEventListener("click",function(){hour=bh.hour;document.getElementById("slide").value=hour;render();});
-}
-function hourCurve(i){
-  var sr=SUN[DAYS[day]],lo=Math.max(sr[0],5),hi=Math.min(sr[1],22),n=hi-lo;
-  var out='<svg class="hcurve" viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true">';
-  var w=300/(n+1);
-  for(var h=lo;h<=hi;h++){
-    var t=idxOf(day,h),c=t<0?null:cond(i,t);
-    var v=(c&&!c.fail)?c.score:0;
-    var bh=v/20*34;
-    var col=v===0?"var(--s-none)":v>=16?"var(--s-top)":v>=14?"var(--s-good)":v>=12?"var(--s-mid)":v>=9?"var(--s-low)":"var(--s-bad)";
-    out+='<rect x="'+((h-lo)*w+1)+'" y="'+(38-bh)+'" width="'+(w-2)+'" height="'+Math.max(bh,1.5)+'" fill="'+col+'" opacity="'+(h===hour?1:.4)+'" rx="1"/>';
-    if(h%3===0)out+='<text x="'+((h-lo)*w+w/2)+'" y="45" text-anchor="middle" font-size="7.5" fill="var(--ink-soft)" font-family="var(--mono)">'+h+'</text>';
+
+  // carnet de session
+  if(day<=todayIdx){
+    if(!logOpen){
+      html+='<div class="sect">Carnet</div><button class="logbtn" id="opnlog" type="button">Noter cette session</button>';
+    }else{
+      html+='<div class="sect">Noter cette session</div><div class="logform">'+
+        '<p>Ce que tu as vraiment trouvé sur place, le '+new Date(DAYS[day]+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"long"})+
+        (bh?' (annoncé '+bh.st.toString().replace(".",",")+'★)':'')+' :</p><div class="starpick" id="pick"></div><div class="reasons" id="rsn"></div>'+
+        '<textarea id="lognote" placeholder="Ce qui ne collait pas, ou ce qui était mieux que prévu…"></textarea>'+
+        '<div class="logacts"><button type="button" id="logcancel">Annuler</button><button type="button" class="primary" id="logsave">Enregistrer</button></div></div>';
+    }
   }
-  return out+'</svg>';
+  p.innerHTML=html;
+
+  var fb=document.getElementById("favbtn");
+  if(fb)fb.addEventListener("click",function(){if(FAV[sel])delete FAV[sel];else FAV[sel]=1;saveFav();render();});
+  var gb=document.getElementById("goBest");
+  if(gb)gb.addEventListener("click",function(){hour=bh.hour;render();});
+  var ol=document.getElementById("opnlog");
+  if(ol)ol.addEventListener("click",function(){logOpen=true;logStars=bh?bh.st:0;logReasons=[];renderPanel();});
+  var lc=document.getElementById("logcancel");
+  if(lc)lc.addEventListener("click",function(){logOpen=false;renderPanel();});
+  var pick=document.getElementById("pick");
+  if(pick){
+    for(var k=1;k<=4;k++)(function(k){
+      var half=document.createElement("button");half.type="button";
+      half.className=logStars>=k-0.5?"on":"";
+      half.innerHTML=oneStar(Math.max(0,Math.min(1,logStars-(k-1))),22);
+      half.style.color=logStars>=k?"var(--s-mid)":"var(--star-off)";
+      half.addEventListener("click",function(e){
+        var r=half.getBoundingClientRect();
+        logStars=(e.clientX-r.left)<r.width/2?k-0.5:k;
+        renderPanel();
+      });
+      pick.appendChild(half);
+    })(k);
+    var lbl=document.createElement("span");
+    lbl.style.cssText="align-self:center;margin-left:8px;font-family:var(--mono);font-size:13px;color:var(--ink-soft)";
+    lbl.textContent=logStars?String(logStars).replace(".",",")+"★":"0★ — pas surfable";
+    pick.appendChild(lbl);
+    var rs=document.getElementById("rsn");
+    REASONS.forEach(function(r){
+      var b=document.createElement("button");b.type="button";b.className="chip";
+      b.setAttribute("aria-pressed",logReasons.indexOf(r)>=0?"true":"false");b.textContent=r;
+      b.addEventListener("click",function(){
+        var k=logReasons.indexOf(r); if(k>=0)logReasons.splice(k,1); else logReasons.push(r);
+        var note=document.getElementById("lognote").value;
+        renderPanel(); var n2=document.getElementById("lognote"); if(n2)n2.value=note;
+      });
+      rs.appendChild(b);
+    });
+    document.getElementById("logsave").addEventListener("click",function(){
+      LOG.unshift({spot:S[sel][0],si:sel,date:DAYS[day],hour:hour,
+        predicted:bh?bh.st:0, actual:logStars, reasons:logReasons.slice(),
+        note:document.getElementById("lognote").value.trim(),
+        face:c?+c.face.toFixed(1):null, per:c?Math.round(c.T):null, wind:c?Math.round(c.wind):null, tide:c?+c.tide.toFixed(2):null});
+      saveLog();logOpen=false;render();toast("Session enregistrée");
+    });
+  }
 }
-function renderClock(){
+function renderSessions(){
+  var box=document.getElementById("sessions");
+  if(!LOG.length){
+    box.innerHTML='<h2>Carnet de session</h2><p class="hint" style="font-size:13px">Vide pour l\'instant. Après chaque session, ouvre le spot et note ce que tu as vraiment trouvé : c\'est ce qui corrigera les réglages des spots au fil de la saison.</p>';
+    return;
+  }
+  var html='<h2>Carnet de session <span style="font-weight:400;text-transform:none;letter-spacing:0">('+LOG.length+')</span>'+
+    '<button type="button" id="exp">Exporter</button></h2><div class="slist">';
+  LOG.slice(0,12).forEach(function(s,k){
+    var d=s.actual-s.predicted;
+    var col=Math.abs(d)<0.5?"var(--s-good)":d<0?"var(--s-bad)":"var(--s-top)";
+    html+='<div class="srow"><span class="sd">'+new Date(s.date+"T12:00:00").toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})+'</span>'+
+      '<span class="sn">'+s.spot+'</span>'+starSVG(s.actual,12,colStars(s.actual))+
+      '<span class="delta" style="background:'+col+';color:#fff">'+(d>0?"+":"")+String(d).replace(".",",")+'</span>'+
+      '<button class="del" data-k="'+k+'" aria-label="Supprimer">×</button>'+
+      ((s.reasons&&s.reasons.length)||s.note?'<span class="note">'+[(s.reasons||[]).join(" · "),s.note].filter(Boolean).join(" — ")+'</span>':'')+
+      '</div>';
+  });
+  box.innerHTML=html+'</div>';
+  box.querySelectorAll(".del").forEach(function(b){
+    b.addEventListener("click",function(){LOG.splice(+b.dataset.k,1);saveLog();renderSessions();});
+  });
+  document.getElementById("exp").addEventListener("click",function(){
+    var txt=JSON.stringify(LOG,null,2);
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){toast("Carnet copié — colle-le dans Claude");},dl);
+    }else dl();
+    function dl(){
+      try{
+        var a=document.createElement("a");
+        a.href=URL.createObjectURL(new Blob([txt],{type:"application/json"}));
+        a.download="carnet-surf.json";a.click();
+        toast("Carnet téléchargé");
+      }catch(e){toast("Copie impossible");}
+    }
+  });
+}
+function toast(msg){
+  var d=document.createElement("div");d.className="toast";d.textContent=msg;document.body.appendChild(d);
+  setTimeout(function(){d.remove();},2600);
+}
+function renderChips(){
+  [["f0",0],["f2",2],["f3",3]].forEach(function(x){
+    document.getElementById(x[0]).setAttribute("aria-pressed",minStars===x[1]?"true":"false");
+  });
+  document.getElementById("ffav").setAttribute("aria-pressed",favOnly?"true":"false");
+  document.getElementById("segmap").setAttribute("aria-pressed",tab==="map"?"true":"false");
+  document.getElementById("seglist").setAttribute("aria-pressed",tab==="list"?"true":"false");
+  if(window.matchMedia("(max-width:820px)").matches){
+    document.getElementById("plate").hidden = tab!=="map";
+    document.querySelector(".rank").hidden = tab!=="list";
+  }else{
+    document.getElementById("plate").hidden=false;
+    document.querySelector(".rank").hidden=false;
+  }
+}
+function render(){
+  _cc={};
+  renderVerdict();renderDays();clampHour();
   document.getElementById("hval").textContent=hour+"h";
-  document.getElementById("hlab").textContent=DN[new Date(DAYS[day]+"T12:00:00").getDay()];
   var sl=document.getElementById("slide");
   document.getElementById("prev").disabled=hour<=+sl.min;
   document.getElementById("next").disabled=hour>=+sl.max;
+  renderChips();renderSpark();renderMarkers();renderRank();renderPanel();renderSessions();
 }
-function render(){renderDays();clampHour();renderClock();renderSpark();renderDots();renderRank();renderPanel();}
 
-// ---------- boot ----------
+// ---- boot ----
 function stamp(){
   var d=new Date(fetchedAt);
   document.getElementById("stamp").innerHTML='relevé '+d.toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+'<br><button type="button" id="refresh">rafraîchir</button>';
@@ -624,28 +1031,40 @@ function stamp(){
 drawBase();
 document.getElementById("prev").addEventListener("click",function(){hour--;clampHour();render();});
 document.getElementById("next").addEventListener("click",function(){hour++;clampHour();render();});
-document.getElementById("slide").addEventListener("input",function(e){hour=+e.target.value;renderClock();renderSpark();renderDots();renderRank();renderPanel();});
+document.getElementById("slide").addEventListener("input",function(e){hour=+e.target.value;render();});
 document.getElementById("jump").addEventListener("click",function(){
-  var sr=SUN[DAYS[day]],lo=Math.max(sr[0],5),hi=Math.min(sr[1],22),best=lo,bv=-1;
-  for(var h=lo;h<=hi;h++){var v=hourPeak(day,h);if(v>bv){bv=v;best=h;}}
+  var r=dayHours(day),best=r[0],bv=-1;
+  for(var h=r[0];h<=r[1];h++){var v=hourPeak(day,h);if(v>bv){bv=v;best=h;}}
   hour=best;render();
 });
+document.getElementById("zin").addEventListener("click",function(){zoomAt(0.72,view.x+view.w/2,view.y+view.h/2);});
+document.getElementById("zout").addEventListener("click",function(){zoomAt(1.38,view.x+view.w/2,view.y+view.h/2);});
+document.getElementById("zfit").addEventListener("click",function(){view={x:0,y:0,w:W,h:H};applyView();renderMarkers();});
+[["f0",0],["f2",2],["f3",3]].forEach(function(x){
+  document.getElementById(x[0]).addEventListener("click",function(){minStars=x[1];render();});
+});
+document.getElementById("ffav").addEventListener("click",function(){favOnly=!favOnly;render();});
+document.getElementById("segmap").addEventListener("click",function(){tab="map";renderChips();renderMarkers();});
+document.getElementById("seglist").addEventListener("click",function(){tab="list";renderChips();});
+window.addEventListener("resize",function(){renderChips();renderMarkers();});
 document.addEventListener("keydown",function(e){
+  if(e.target.tagName==="TEXTAREA")return;
   if(e.key==="ArrowLeft"){hour--;clampHour();render();}
   if(e.key==="ArrowRight"){hour++;clampHour();render();}
 });
 
 load(false).then(function(){
-  var now=new Date(),today=now.toISOString().slice(0,10);
-  var d=DAYS.indexOf(today); day=d<0?0:d;
+  var now=new Date();
+  var today=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
+  var d=DAYS.indexOf(today); todayIdx=d<0?0:d; day=todayIdx;
   hour=Math.min(Math.max(now.getHours(),6),20);
   document.getElementById("boot").hidden=true;
   document.getElementById("app").hidden=false;
   stamp();render();
-}).catch(function(err){
+}).catch(function(){
   document.getElementById("boot").innerHTML='<h2>Pas de données</h2>'+
     '<p>Impossible de joindre Open-Meteo. Vérifie ta connexion, puis recharge.</p>'+
-    '<p style="font-size:12px">Si tu ouvres ce fichier directement depuis le disque, sers-le plutôt par une vraie URL — par exemple <code>python3 -m http.server</code> ou GitHub Pages.</p>';
+    '<p style="font-size:12px">Si tu ouvres ce fichier directement depuis le disque, sers-le par une vraie URL — <code>python3 -m http.server</code> ou GitHub Pages.</p>';
 });
 })();
 </script>
