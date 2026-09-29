@@ -1,7 +1,7 @@
 /* sw.js — service worker : la page reste consultable sans réseau.
    Règle : le réseau d'abord quand il répond vite, le cache sinon.
    On ne sert jamais du code périmé alors que le réseau est disponible. */
-var VERSION="houle-v3.1.0";
+var VERSION="houle-v3.1.1";
 var SHELL=["./","./index.html","./style.css","./app.js","./help.js","./scoring.js","./worker.js","./spots.json","./coast.json"];
 var NET_TIMEOUT=2500;
 

@@ -2,7 +2,7 @@
 (function(){
 "use strict";
 
-var VERSION="3.1.0";
+var VERSION="3.1.1";
 var S=null, ZONES=[], COAST=[], G=null;          // spots, zones, trait de côte, grille calculée
 var fetchedAt=null, partial=0, offline=false;
 var ti=0, sel=null, minStars=0, favOnly=false, tab="map", query="", sortBy="score";
@@ -420,6 +420,8 @@ function renderDays(){
 }
 // ---------- frise : houle au large + qualité ----------
 var CW=11, SH={swell:[8,60], bars:[66,104], lab:[108,124]};
+// la frise occupe toute la largeur disponible, sans jamais descendre sous une cible tactile correcte
+function cellW(n){var sc=$("scroller");var w=sc?sc.clientWidth:360;return Math.max(11,Math.floor(w/n));}
 function refSwell(t){
   var h=0,p=0,n=0;
   for(var i=0;i<S.length;i++){
@@ -435,7 +437,9 @@ function stripRange(){
   return [Math.max(0,r[0]-3), Math.min(G.times.length-1,r[1]+3)];
 }
 function renderStrip(){
-  var svg=$("strip"),rg=stripRange(),a=rg[0],b=rg[1],N=b-a+1,W=N*CW;
+  var svg=$("strip"),rg=stripRange(),a=rg[0],b=rg[1],N=b-a+1;
+  CW=cellW(N);
+  var W=N*CW;
   svg.setAttribute("width",W);svg.setAttribute("viewBox","0 0 "+W+" 128");
   while(svg.firstChild)svg.removeChild(svg.firstChild);
   var maxH=0.8,maxP=8,ref=[];
@@ -937,7 +941,8 @@ function wireUI(){
     clearTimeout(qt);var v=e.target.value;
     qt=setTimeout(function(){query=v;renderMarkers();renderRank();},160);
   });
-  window.addEventListener("resize",function(){renderChips();renderMarkers();});
+  var rzT=null;
+  window.addEventListener("resize",function(){clearTimeout(rzT);rzT=setTimeout(function(){renderChips();renderStrip();renderMarkers();},120);});
   window.addEventListener("hashchange",function(){if(readURL()){render();scrollStripTo(ti);}});
   document.addEventListener("keydown",function(e){
     if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
