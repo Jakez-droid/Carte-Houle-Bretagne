@@ -745,9 +745,8 @@ function renderChips(){
 function renderClock(){
   var d=new Date(dayOf(ti)+"T12:00:00");
   $("hnow").innerHTML=["dim","lun","mar","mer","jeu","ven","sam"][d.getDay()]+" "+d.getDate()+"/"+(d.getMonth()+1)+" · <b>"+hourOf(ti)+"h</b>";
-  var any=null;
-  for(var i=0;i<S.length&&!any;i++){var c=cellAt(i,ti);if(c&&c.coef!=null)any=c;}
-  $("coef").textContent=any?("coefficient "+any.coef):"";
+  var co=G.coefs?G.coefs[dayOf(ti)]:null;
+  $("coef").textContent=co?("coefficient "+co):"";
   $("prev").disabled=ti<=0;$("next").disabled=ti>=G.times.length-1;
 }
 function renderLegend(){

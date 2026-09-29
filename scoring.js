@@ -31,7 +31,8 @@ function nearshore(spot,H0,dir){
 function faceHeight(Hs,T){ return Hs*shoal(T)*1.45; }
 
 // Coefficient de marée à la bretonne, estimé depuis le marnage du jour.
-// Repère : marnage ~6,1 m à Brest correspond au coefficient 100.
+// C'est un nombre unique référencé à Brest, pas une valeur par plage :
+// il se calcule donc sur un point de référence, et l'échelle officielle va de 20 à 120.
 function tideCoef(range){ return Math.round(clamp(range/6.1*100,20,120)); }
 
 // ---------- fenêtres de marée ----------
@@ -192,6 +193,29 @@ function buildGrid(spots,marine,wx){
   }
   days.forEach(function(d){ if(!sun[d])sun[d]=[8,19]; });
 
+  // coefficient de marée du jour : nombre unique, calculé sur le spot le plus
+  // proche de Brest (référence officielle), et non plage par plage.
+  var refI=0,refD=1e9;
+  for(var s2=0;s2<spots.length;s2++){
+    var dd2=Math.abs(spots[s2].lat-48.38)+Math.abs(spots[s2].lon+4.49);
+    if(marine[s2]&&marine[s2].hourly&&dd2<refD){refD=dd2;refI=s2;}
+  }
+  var coefs={};
+  if(marine[refI]&&marine[refI].hourly&&marine[refI].hourly.sea_level_height_msl){
+    var lvR=marine[refI].hourly.sea_level_height_msl, mm={};
+    days.forEach(function(d){mm[d]=[Infinity,-Infinity];});
+    for(var t9=0;t9<times.length;t9++){
+      var v9=lvR[t9]; if(v9==null)continue;
+      var d9=times[t9].slice(0,10);
+      if(v9<mm[d9][0])mm[d9][0]=v9;
+      if(v9>mm[d9][1])mm[d9][1]=v9;
+    }
+    days.forEach(function(d){
+      var r9=mm[d][1]-mm[d][0];
+      coefs[d]=isFinite(r9)&&r9>0?tideCoef(r9):null;
+    });
+  }
+
   var grid=spots.map(function(spot,i){
     var m=marine[i],f=wx[i];
     if(!m||!m.hourly||!f||!f.hourly) return {missing:true,hours:[]};
@@ -224,6 +248,7 @@ function buildGrid(spots,marine,wx){
         windMem:memo
       };
       var cell=scoreHour(spot,sample);
+      if(cell&&coefs[d2]!=null)cell.coef=coefs[d2];   // coefficient national, pas local
       hours[t2]=cell;
       // mémoire de vent : moyenne glissante de la qualité de vent des heures précédentes
       if(sample.wdir!=null&&sample.wind!=null){
@@ -234,7 +259,7 @@ function buildGrid(spots,marine,wx){
     }
     return {missing:false,hours:hours};
   });
-  return {version:VERSION,times:times,days:days,sun:sun,grid:grid};
+  return {version:VERSION,times:times,days:days,sun:sun,coefs:coefs,grid:grid};
 }
 function pick(h,key,t){ return (h&&h[key]&&h[key][t]!=null)?h[key][t]:null; }
 
