@@ -219,3 +219,72 @@ footer a{color:var(--accent)}
 .modalbody h4{font-family:var(--body);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin:20px 0 6px;font-weight:600}
 .modalbody p{margin:0 0 10px;font-size:14.5px;line-height:1.6}
 .modalbody p b{font-weight:600}
+
+/* ===== onglets ===== */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--rule);margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1 0 auto;min-width:88px;min-height:44px;border:none;background:none;color:var(--ink-soft);padding:10px 14px;font-size:13.5px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tab:hover{color:var(--ink)}
+.view{min-width:0}
+
+/* ===== onglet Où surfer ===== */
+.gohead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.goday{font-family:var(--display);font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em;text-transform:capitalize}
+.gocoef{font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
+.goconf{font-size:11px;background:var(--s-mid);color:#fff;border-radius:2px;padding:2px 7px}
+.gochips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.zoneblock{border:1px solid var(--rule);border-radius:4px;background:var(--panel);margin-bottom:10px;overflow:hidden}
+.zonehead{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--rule);background:var(--chrome)}
+.zname{font-size:11px;text-transform:uppercase;letter-spacing:.09em;font-weight:600;color:var(--ink)}
+.zcount{margin-left:auto;font-size:11.5px;color:var(--ink-soft);font-family:var(--mono)}
+.gospot{display:grid;grid-template-columns:1fr auto auto auto;grid-template-areas:"n s w d" "g g g g";gap:3px 9px;align-items:center;width:100%;border:none;border-top:1px solid var(--rule);background:none;color:inherit;padding:10px 12px;cursor:pointer;text-align:left;min-height:56px}
+.zoneblock .gospot:first-of-type{border-top:none}
+.gospot:hover{background:var(--chrome)}
+.gname{grid-area:n;font-size:15px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gospot svg{grid-area:s}
+.gwin{grid-area:w;font-family:var(--mono);font-size:13.5px;color:var(--accent);font-weight:500}
+.gdur{grid-area:d;font-family:var(--mono);font-size:11.5px;color:var(--ink-soft)}
+.gdet{grid-area:g;font-size:12.5px;color:var(--ink-soft);font-family:var(--mono)}
+.gonone{border:1px solid var(--rule);border-radius:4px;background:var(--panel);padding:16px}
+.gonone b{font-size:16px}
+.gonone p{margin:6px 0 0;color:var(--ink-soft);font-size:14px}
+.gonext{margin-top:12px;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:3px;padding:10px 14px;font-size:13.5px;cursor:pointer;min-height:42px;width:100%}
+.goko{font-size:13px;color:var(--ink-soft);margin:12px 0 0;padding-left:10px;border-left:2px solid var(--rule)}
+
+/* ===== onglet Données ===== */
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:4px;-webkit-overflow-scrolling:touch}
+.dtable{border-collapse:collapse;width:100%;font-size:13px;background:var(--panel)}
+.dtable th{text-align:left;padding:0;border-bottom:1px solid var(--rule);background:var(--chrome);position:sticky;top:0;z-index:1}
+.dtable th:not(:first-child),.dtable td:not(:first-child){white-space:nowrap}
+.sortcol{width:100%;border:none;background:none;color:var(--ink-soft);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;padding:9px 10px;cursor:pointer;text-align:left;min-height:36px}
+.sortcol:hover{color:var(--accent)}
+.arw{margin-left:3px;color:var(--accent)}
+.dtable th:last-child{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);padding:9px 10px;font-weight:600}
+.dtable td{padding:8px 10px;border-bottom:1px solid var(--rule)}
+.dtable tbody tr{cursor:pointer}
+.dtable tbody tr:hover{background:var(--chrome)}
+.dtable tr.dim td{opacity:.55}
+.dtable .tname{font-weight:500;min-width:130px}
+.dtable .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.dtable .muted{color:var(--ink-soft)}
+.dtable .small{font-size:11.5px}
+.pill{font-size:9.5px;background:var(--s-mid);color:#fff;border-radius:2px;padding:1px 4px;vertical-align:1px}
+
+/* ===== onglet Méthode ===== */
+.doc{max-width:680px}
+.docintro{font-size:15.5px;color:var(--ink-soft);margin:0 0 18px;padding-bottom:16px;border-bottom:1px solid var(--rule)}
+.docnav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px}
+.docnav a{font-size:12px;border:1px solid var(--rule);border-radius:99px;padding:5px 11px;color:var(--ink-soft);text-decoration:none}
+.docnav a:hover{border-color:var(--accent);color:var(--accent)}
+.docsec{margin-bottom:28px;scroll-margin-top:16px}
+.docsec h3{font-family:var(--display);font-size:20px;font-weight:600;margin:0 0 10px;letter-spacing:-.01em}
+.docsec p{margin:0 0 11px;font-size:14.5px;line-height:1.62}
+.docsec p b{font-weight:600;color:var(--ink)}
+.metric{border-left:2px solid var(--accent);padding-left:12px;margin-bottom:14px}
+.metric h4{font-family:var(--body);font-size:13.5px;font-weight:600;margin:0 0 4px}
+.metric p{font-size:14px;margin:0;color:var(--ink-soft)}
+.gloss{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+.gloss dt{font-weight:600;white-space:nowrap}
+.gloss dd{margin:0;color:var(--ink-soft)}
+@media (max-width:560px){.gloss{grid-template-columns:1fr;gap:2px}.gloss dd{margin-bottom:10px}}

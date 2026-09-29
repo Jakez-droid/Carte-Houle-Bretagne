@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Houle Bretagne</title>
-<meta name="description" content="Prévisions de surf sur 57 spots du Finistère et de la Côte Sauvage du Morbihan.">
+<meta name="description" content="Prévisions de surf sur 59 spots du Finistère et de la Côte Sauvage du Morbihan.">
 <meta name="theme-color" content="#125f70">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Houle">
@@ -20,81 +20,99 @@
 <div class="wrap">
   <header>
     <h1>Houle Bretagne</h1>
-    <button class="guidebtn" type="button" id="btnGuide">Comment ça marche</button>
     <div class="stamp" id="stamp"></div>
   </header>
 
   <div id="boot" class="boot">
     <h2>Chargement des prévisions…</h2>
-    <p>Houle, vent, marée et température sur 57 spots.</p>
+    <p>Houle, vent, marée et température sur 59 spots.</p>
   </div>
 
   <main id="app" hidden>
     <button class="verdict" id="verdict" type="button"></button>
 
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Vues">
+      <button class="tab" type="button" role="tab" data-tab="go">Où surfer</button>
+      <button class="tab" type="button" role="tab" data-tab="map">Carte</button>
+      <button class="tab" type="button" role="tab" data-tab="data">Données</button>
+      <button class="tab" type="button" role="tab" data-tab="doc">Méthode</button>
+    </nav>
+
     <div class="days" id="days" role="group" aria-label="Choisir un jour"></div>
 
-    <section class="strip" aria-label="Houle et qualité heure par heure">
-      <div class="striphead">
-        <span class="lgd"><i style="background:var(--accent);opacity:.35"></i>houle au large</span>
-        <span class="lgd"><i style="background:var(--ink-soft)"></i>période</span>
-        <span class="now">
-          <button class="nowbtn" type="button" id="btnNow">Maintenant</button>
-          <button class="nowbtn" type="button" id="btnPeak">Meilleur créneau</button>
-        </span>
-      </div>
-      <div class="scroller" id="scroller">
-        <svg id="strip" height="128" role="img" aria-label="Frise de la houle et de la qualité"></svg>
-      </div>
-      <div class="hourbtns">
-        <button class="hbtn" id="prev" type="button" aria-label="Heure précédente">◀</button>
-        <button class="hbtn" id="next" type="button" aria-label="Heure suivante">▶</button>
-        <span class="hnow" id="hnow">—</span>
-        <span class="coef" id="coef"></span>
-      </div>
+    <section class="view" id="view-go" role="tabpanel" aria-label="Où surfer">
+      <div id="goBody"></div>
     </section>
 
-    <div class="chips">
-      <button class="chip" id="f0" type="button">Tous</button>
-      <button class="chip" id="f2" type="button">2★ et +</button>
-      <button class="chip" id="f3" type="button">3★ et +</button>
-      <button class="chip" id="ffav" type="button">Mes spots</button>
-      <input class="search" id="q" type="search" placeholder="Chercher un spot" aria-label="Chercher un spot">
-      <select class="sortsel" id="sort" aria-label="Trier le classement">
-        <option value="score">Par note</option>
-        <option value="name">Par nom</option>
-        <option value="zone">Par zone</option>
-      </select>
-      <div class="seg" id="seg">
-        <button type="button" id="segmap">Carte</button>
-        <button type="button" id="seglist">Liste</button>
+    <section class="view" id="view-map" role="tabpanel" aria-label="Carte" hidden>
+      <div class="strip">
+        <div class="striphead">
+          <span class="lgd"><i style="background:var(--accent);opacity:.35"></i>houle au large</span>
+          <span class="lgd"><i style="background:var(--ink-soft)"></i>période</span>
+          <span class="now">
+            <button class="nowbtn" type="button" id="btnNow">Maintenant</button>
+            <button class="nowbtn" type="button" id="btnPeak">Meilleur créneau</button>
+          </span>
+        </div>
+        <div class="scroller" id="scroller">
+          <svg id="strip" height="128" role="img" aria-label="Frise de la houle et de la qualité"></svg>
+        </div>
+        <div class="hourbtns">
+          <button class="hbtn" id="prev" type="button" aria-label="Heure précédente">◀</button>
+          <button class="hbtn" id="next" type="button" aria-label="Heure suivante">▶</button>
+          <span class="hnow" id="hnow">—</span>
+          <span class="coef" id="coef"></span>
+        </div>
       </div>
-    </div>
 
-    <div class="cols">
-      <div>
-        <div class="plate" id="plate">
-          <svg class="map" id="map" viewBox="0 0 1000 960" role="img" aria-label="Carte des spots"></svg>
-          <div class="zoomctl">
-            <button type="button" id="zin" aria-label="Zoomer">+</button>
-            <button type="button" id="zout" aria-label="Dézoomer">−</button>
-            <button type="button" id="zfit" aria-label="Vue d'ensemble">⤢</button>
+      <div class="chips">
+        <button class="chip" id="f0" type="button">Tous</button>
+        <button class="chip" id="f2" type="button">2★ et +</button>
+        <button class="chip" id="f3" type="button">3★ et +</button>
+        <button class="chip" id="ffav" type="button">Mes spots</button>
+        <input class="search" id="q" type="search" placeholder="Chercher un spot" aria-label="Chercher un spot">
+        <select class="sortsel" id="sort" aria-label="Trier le classement">
+          <option value="score">Par note</option>
+          <option value="name">Par nom</option>
+          <option value="zone">Par zone</option>
+        </select>
+        <div class="seg" id="seg">
+          <button type="button" id="segmap">Carte</button>
+          <button type="button" id="seglist">Liste</button>
+        </div>
+      </div>
+
+      <div class="cols">
+        <div>
+          <div class="plate" id="plate">
+            <svg class="map" id="map" viewBox="0 0 1000 960" role="img" aria-label="Carte des spots"></svg>
+            <div class="zoomctl">
+              <button type="button" id="zin" aria-label="Zoomer">+</button>
+              <button type="button" id="zout" aria-label="Dézoomer">−</button>
+              <button type="button" id="zfit" aria-label="Vue d'ensemble">⤢</button>
+            </div>
+            <div class="legend" id="legend"></div>
           </div>
-          <div class="legend" id="legend"></div>
+          <div class="rank">
+            <h2 id="rankh">Classement</h2>
+            <ol id="rank"></ol>
+          </div>
         </div>
-        <div class="rank">
-          <h2 id="rankh">Classement</h2>
-          <ol id="rank"></ol>
-        </div>
+        <div class="panel" id="panel"></div>
       </div>
-      <div class="panel" id="panel"></div>
-    </div>
 
-    <section class="sessions" id="sessions"></section>
+      <section class="sessions" id="sessions"></section>
+    </section>
+
+    <section class="view" id="view-data" role="tabpanel" aria-label="Données" hidden>
+      <div id="dataBody"></div>
+    </section>
+
+    <section class="view" id="view-doc" role="tabpanel" aria-label="Méthode" hidden>
+      <div id="docBody"></div>
+    </section>
 
     <footer>
-      <p><b>Taille de face</b> — estimation du déferlement : abri et angle d'incidence du spot, gain de levée selon la période, puis conversion en hauteur de face. Un ordre de grandeur, pas une mesure.</p>
-      <p><b>Fiabilité</b> — au-delà de J+3 la frise s'estompe, au-delà de J+6 elle est nettement pâle. Ne pose pas un jour de congé sur une prévision à J+8.</p>
       <p>Données météo et marines <a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a> (CC BY 4.0), modèles ECMWF et Météo-France. <span id="ver"></span></p>
     </footer>
   </main>

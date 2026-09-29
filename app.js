@@ -2,7 +2,7 @@
 (function(){
 "use strict";
 
-var VERSION="3.1.1";
+var VERSION="4.0.0";
 var S=null, ZONES=[], COAST=[], G=null;          // spots, zones, trait de côte, grille calculée
 var fetchedAt=null, partial=0, offline=false;
 var ti=0, sel=null, minStars=0, favOnly=false, tab="map", query="", sortBy="score";
@@ -162,7 +162,7 @@ function weekBest(){
 
 // ---------- état dans l'URL ----------
 function writeURL(){
-  var parts=["t="+G.times[ti].replace(":00","")];
+  var parts=["v="+tabNow,"t="+G.times[ti].replace(":00","")];
   if(sel!=null)parts.push("s="+slug(S[sel].name));
   var h="#"+parts.join("&");
   if(location.hash!==h)history.replaceState(null,"",h);
@@ -180,6 +180,7 @@ function readURL(){
     if(k==="s"){
       for(var i=0;i<S.length;i++)if(slug(S[i].name)===v){sel=i;got=true;}
     }
+    if(k==="v"&&["go","map","data","doc"].indexOf(v)>=0){tabNow=v;got=true;}
   });
   return got;
 }
@@ -413,7 +414,7 @@ function renderDays(){
         if(p&&p.c.score>bestS){bestS=p.c.score;bestT=t;}
       }
       ti = want>=0?want : (bestT>=0?bestT:nearestDay(r[0]));
-      render();scrollStripTo(ti);
+      render();if(tabNow==="map")scrollStripTo(ti);
     });
     box.appendChild(b);
   });
@@ -806,6 +807,343 @@ function renderSessions(){
   });
 }
 
+
+// ================= ONGLETS =================
+var tabNow="go";
+function setTab(name){
+  tabNow=name;
+  ["go","map","data","doc"].forEach(function(k){
+    var v=document.getElementById("view-"+k);
+    if(v)v.hidden = (k!==name);
+  });
+  document.querySelectorAll("#tabs .tab").forEach(function(b){
+    b.setAttribute("aria-selected", b.dataset.tab===name?"true":"false");
+  });
+  // le selecteur de jour ne sert pas dans la methode
+  $("days").hidden = (name==="doc");
+  if(name==="go")renderGo();
+  if(name==="map"){renderStrip();renderMarkers();renderRank();renderPanel();renderSessions();scrollStripTo(ti);}
+  if(name==="data")renderData();
+  if(name==="doc")renderDoc();
+  writeURL();
+}
+
+// ================= ONGLET 1 : OU SURFER =================
+// creneau continu d'un spot sur la journee : debut, fin, heure de pointe
+function windowOf(i,day){
+  var r=dayRange(day),runs=[],cur=null;
+  for(var t=r[0];t<=r[1];t++){
+    var c=isDay(t)?cellAt(i,t):null;
+    var ok=c&&!c.fail&&c.stars>=1;
+    if(ok){
+      if(!cur)cur={a:t,b:t,peak:t,score:c.score,stars:c.stars};
+      else{cur.b=t;if(c.score>cur.score){cur.score=c.score;cur.stars=c.stars;cur.peak=t;}}
+    }else if(cur){runs.push(cur);cur=null;}
+  }
+  if(cur)runs.push(cur);
+  if(!runs.length)return null;
+  runs.sort(function(a,b){
+    var da=(a.b-a.a+1),db=(b.b-b.a+1);
+    return (b.score+db*0.35)-(a.score+da*0.35);   // un bon creneau long bat un pic court
+  });
+  return runs[0];
+}
+function renderGo(){
+  var box=$("goBody"),day=G.days.indexOf(dayOf(ti));
+  var dt=new Date(G.days[day]+"T12:00:00");
+  var libelle=(day===todayIdx()?"Aujourd'hui":dt.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}));
+
+  var found=[];
+  for(var i=0;i<S.length;i++){
+    if(favOnly&&!FAV[i])continue;
+    var w=windowOf(i,day);
+    if(w)found.push({i:i,w:w});
+  }
+  found.sort(function(a,b){return b.w.score-a.w.score;});
+
+  var h='<div class="gohead"><h2 class="goday">'+libelle+'</h2>'+
+        '<span class="gocoef">'+(G.coefs&&G.coefs[dayOf(ti)]?("coefficient "+G.coefs[dayOf(ti)]):"")+'</span>'+
+        (confOf(ti)<1?'<span class="goconf">'+(confOf(ti)>0.5?"tendance à J+"+(day-todayIdx()):"indicatif, J+"+(day-todayIdx()))+'</span>':'')+
+        '</div>';
+
+  if(!found.length){
+    h+='<div class="gonone"><b>Rien de surfable ce jour-là.</b><p>'+whyNothing(day)+'</p>';
+    var next=nextGoodDay(day);
+    if(next!=null){
+      var nd=new Date(G.days[next]+"T12:00:00");
+      h+='<button class="gonext" type="button" data-day="'+next+'">Prochain jour qui marche : '+
+         nd.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})+'</button>';
+    }
+    h+='</div>';
+    box.innerHTML=h;
+    wireGo();return;
+  }
+
+  // regroupement par secteur : on veut lire « la baie d'Audierne est en forme »
+  var byZone={};
+  found.forEach(function(f){(byZone[S[f.i].zone]=byZone[S[f.i].zone]||[]).push(f);});
+  var zones=Object.keys(byZone).map(function(z){
+    var list=byZone[z];
+    return {z:+z,list:list,best:list[0].w.score};
+  }).sort(function(a,b){return b.best-a.best;});
+
+  h+='<div class="gochips"><button class="chip" id="goFav" type="button" aria-pressed="'+(favOnly?"true":"false")+'">Mes spots</button>'+
+     '<button class="chip" id="goCopy" type="button">Copier le résumé</button></div>';
+
+  zones.forEach(function(zg){
+    var st=stars0(zg.best);
+    h+='<div class="zoneblock"><div class="zonehead"><span class="zname">'+ZONES[zg.z]+'</span>'+
+       starSVG(st,13,colStars(st))+'<span class="zcount">'+zg.list.length+' spot'+(zg.list.length>1?"s":"")+'</span></div>';
+    zg.list.slice(0,5).forEach(function(f){
+      var sp=S[f.i],w=f.w,c=cellAt(f.i,w.peak);
+      var dur=w.b-w.a+1;
+      h+='<button class="gospot" type="button" data-i="'+f.i+'" data-t="'+w.peak+'">'+
+        '<span class="gname">'+(FAV[f.i]?"★ ":"")+sp.name+'</span>'+
+        starSVG(w.stars,13,colStars(w.stars))+
+        '<span class="gwin">'+hourOf(w.a)+'h–'+(hourOf(w.b)+1)+'h</span>'+
+        '<span class="gdur">'+dur+' h</span>'+
+        '<span class="gdet">'+nf(c.face.toFixed(1))+' m · '+Math.round(c.T)+' s · '+Math.round(c.wind)+' kn '+WCAT[c.wcat]+
+        ' · '+tideWord(c.tideLevel,c.rising)+'</span>'+
+        '</button>';
+    });
+    h+='</div>';
+  });
+
+  var ko=whyNothing(day,true);
+  if(ko)h+='<p class="goko">'+ko+'</p>';
+  box.innerHTML=h;
+  wireGo();
+}
+function stars0(sc){return window.Scoring.starsFor(sc);}
+function wireGo(){
+  var box=$("goBody");
+  box.querySelectorAll(".gospot").forEach(function(b){
+    b.addEventListener("click",function(){
+      sel=+b.dataset.i; ti=+b.dataset.t;
+      setTab("map");
+      window.scrollTo({top:0,behavior:"smooth"});
+    });
+  });
+  var nx=box.querySelector(".gonext");
+  if(nx)nx.addEventListener("click",function(){
+    var d=+nx.dataset.day,r=dayRange(d),best=-1,bs=-1;
+    for(var t=r[0];t<=r[1];t++){var p=peaks()[t];if(p&&p.c.score>bs){bs=p.c.score;best=t;}}
+    ti=best>=0?best:nearestDay(r[0]);render();
+  });
+  var gf=box.querySelector("#goFav");
+  if(gf)gf.addEventListener("click",function(){favOnly=!favOnly;renderGo();});
+  var gc=box.querySelector("#goCopy");
+  if(gc)gc.addEventListener("click",copySummary);
+}
+function whyNothing(day,brief){
+  // pourquoi ca ne marche pas : on prend le motif dominant sur la journee
+  var r=dayRange(day),count={},total=0;
+  for(var t=r[0];t<=r[1];t++){
+    if(!isDay(t))continue;
+    for(var i=0;i<S.length;i++){
+      var c=cellAt(i,t);
+      if(!c)continue;
+      if(c.fail){count[c.fail]=(count[c.fail]||0)+1;total++;}
+    }
+  }
+  if(!total)return brief?"":"Pas de donnée pour ce jour.";
+  var lab={fenetre:"la houle est hors des fenêtres d'orientation",petit:"il n'y a pas assez de taille",
+    periode:"la période est trop courte, c'est de la mer du vent",vent:"le vent est dedans",
+    gros:"c'est trop gros pour les spots concernés",faible:"les vagues sont là mais sans intérêt"};
+  var top=Object.keys(count).sort(function(a,b){return count[b]-count[a];}).slice(0,2);
+  var txt=top.map(function(k){return lab[k]||k;}).join(", et ");
+  return brief?("Ailleurs : "+txt+"."):("Sur l'ensemble de la côte, "+txt+".");
+}
+function nextGoodDay(from){
+  for(var d=from+1;d<G.days.length;d++){
+    var r=dayRange(d);
+    for(var t=r[0];t<=r[1];t++){var p=peaks()[t];if(p&&p.c.stars>=1)return d;}
+  }
+  return null;
+}
+function copySummary(){
+  var day=G.days.indexOf(dayOf(ti));
+  var dt=new Date(G.days[day]+"T12:00:00");
+  var lines=[dt.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})+
+    (G.coefs&&G.coefs[dayOf(ti)]?(" — coefficient "+G.coefs[dayOf(ti)]):"")];
+  var found=[];
+  for(var i=0;i<S.length;i++){var w=windowOf(i,day);if(w)found.push({i:i,w:w});}
+  found.sort(function(a,b){return b.w.score-a.w.score;});
+  if(!found.length)lines.push("Rien de surfable. "+whyNothing(day));
+  else found.slice(0,6).forEach(function(f){
+    var c=cellAt(f.i,f.w.peak);
+    lines.push("• "+S[f.i].name+" — "+hourOf(f.w.a)+"h-"+(hourOf(f.w.b)+1)+"h, "+nf(f.w.stars)+"/4, "+
+      nf(c.face.toFixed(1))+" m, "+Math.round(c.T)+" s, "+Math.round(c.wind)+" kn "+WCAT[c.wcat]);
+  });
+  var txt=lines.join("\n");
+  if(navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(txt).then(function(){toast("Résumé copié");},function(){toast("Copie refusée");});
+  else toast("Copie indisponible");
+}
+
+// ================= ONGLET 3 : DONNEES =================
+var dataSort="score", dataDesc=true, dataHourAll=false;
+function renderData(){
+  var box=$("dataBody"),day=G.days.indexOf(dayOf(ti));
+  var dt=new Date(G.days[day]+"T12:00:00");
+  var h='<div class="gohead"><h2 class="goday">Toutes les données</h2>'+
+    '<span class="gocoef">'+dt.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"})+' · '+hourOf(ti)+'h'+
+    (G.coefs&&G.coefs[dayOf(ti)]?(" · coef "+G.coefs[dayOf(ti)]):"")+'</span></div>';
+  h+='<div class="gochips">'+
+     '<button class="chip" id="dPrev" type="button">◀ heure</button>'+
+     '<button class="chip" id="dNext" type="button">heure ▶</button>'+
+     '<button class="chip" id="dMode" type="button" aria-pressed="'+(dataHourAll?"true":"false")+'">'+(dataHourAll?"Meilleur du jour":"Heure affichée")+'</button>'+
+     '<button class="chip" id="dCsv" type="button">Exporter en CSV</button></div>';
+
+  var rows=[];
+  for(var i=0;i<S.length;i++){
+    var t=ti,c=null,lab="";
+    if(dataHourAll){
+      var w=windowOf(i,day);
+      if(w){t=w.peak;lab=hourOf(w.a)+"–"+(hourOf(w.b)+1)+"h";}
+      else {var bh=bestHourOf(i,day); if(bh){t=bh.t;lab=hourOf(bh.t)+"h";} else lab="—";}
+    }
+    c=cellAt(i,t);
+    rows.push({i:i,c:c,t:t,lab:lab});
+  }
+  var dir=dataDesc?1:-1;
+  rows.sort(function(a,b){
+    function v(r){
+      var c=r.c;
+      switch(dataSort){
+        case "name":return S[r.i].name;
+        case "zone":return S[r.i].zone;
+        case "face":return c&&c.face!=null?c.face:-1;
+        case "per":return c&&c.T!=null?c.T:-1;
+        case "wind":return c&&c.wind!=null?c.wind:-1;
+        case "tide":return c&&c.tideLevel!=null?c.tideLevel:-1;
+        default:return (c&&!c.fail)?c.score:-1;
+      }
+    }
+    var x=v(a),y=v(b);
+    if(typeof x==="string")return dir*x.localeCompare(y);
+    return dir*(y-x);
+  });
+
+  var cols=[["name","Spot"],["score","Note"],["face","Face"],["per","Pér."],["wind","Vent"],["tide","Marée"],["zone","Secteur"]];
+  h+='<div class="tablewrap"><table class="dtable"><thead><tr>';
+  cols.forEach(function(cl){
+    h+='<th><button type="button" class="sortcol" data-k="'+cl[0]+'">'+cl[1]+
+       (dataSort===cl[0]?('<span class="arw">'+(dataDesc?"▾":"▴")+'</span>'):'')+'</button></th>';
+  });
+  h+='<th>État</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    var sp=S[r.i],c=r.c;
+    var good=c&&!c.fail&&c.stars>=1;
+    var etat=!c?"—":c.fail==="fenetre"?"hors fenêtre":c.fail==="petit"?"trop petit":
+      c.fail==="periode"?"mer du vent":c.fail==="vent"?"vent dedans":c.fail==="gros"?"trop gros":
+      c.fail==="faible"?"sans intérêt":(r.lab||"ok");
+    h+='<tr data-i="'+r.i+'" data-t="'+r.t+'" class="'+(good?"":"dim")+'">'+
+      '<td class="tname">'+(FAV[r.i]?"★ ":"")+sp.name+'</td>'+
+      '<td>'+(good?starSVG(c.stars,11,colStars(c.stars)):'<span class="muted">—</span>')+'</td>'+
+      '<td class="num">'+(c&&c.face!=null?nf(c.face.toFixed(1))+' m':'—')+'</td>'+
+      '<td class="num">'+(c&&c.T!=null?Math.round(c.T)+' s':'—')+'</td>'+
+      '<td class="num">'+(c&&c.wind!=null?(Math.round(c.wind)+' '+["off","c-off","c-on","on"][c.wcat]):'—')+'</td>'+
+      '<td class="num">'+(c&&c.tideLevel!=null?Math.round(c.tideLevel*100)+' %':'—')+'</td>'+
+      '<td class="muted small">'+ZONES[sp.zone]+'</td>'+
+      '<td class="muted small">'+etat+'</td></tr>';
+  });
+  h+='</tbody></table></div>';
+  h+='<p class="hint" style="margin-top:10px;font-size:12.5px">Marée en % : 0 % basse, 100 % haute. Vent : off = offshore, on = onshore. Touche une ligne pour ouvrir le spot sur la carte.</p>';
+  box.innerHTML=h;
+
+  box.querySelectorAll(".sortcol").forEach(function(b){
+    b.addEventListener("click",function(){
+      var k=b.dataset.k;
+      if(dataSort===k)dataDesc=!dataDesc; else {dataSort=k;dataDesc=(k!=="name");}
+      renderData();
+    });
+  });
+  box.querySelectorAll("tbody tr").forEach(function(tr){
+    tr.addEventListener("click",function(){sel=+tr.dataset.i;ti=+tr.dataset.t;setTab("map");window.scrollTo({top:0,behavior:"smooth"});});
+  });
+  $("dPrev").addEventListener("click",function(){step(-1);renderData();});
+  $("dNext").addEventListener("click",function(){step(1);renderData();});
+  $("dMode").addEventListener("click",function(){dataHourAll=!dataHourAll;renderData();});
+  $("dCsv").addEventListener("click",function(){exportCsv(rows);});
+}
+function exportCsv(rows){
+  var head=["spot","secteur","date","heure","note_sur_4","face_m","houle_spot_m","periode_s","houle_deg","vent_kn","vent_deg","vent_axe","rafales_kn","maree_pct","coef","eau_c","air_c","etat"];
+  var lines=[head.join(";")];
+  rows.forEach(function(r){
+    var sp=S[r.i],c=r.c;
+    lines.push([sp.name,ZONES[sp.zone],dayOf(r.t),hourOf(r.t)+"h",
+      c&&!c.fail?c.stars:"", c&&c.face!=null?c.face.toFixed(2):"", c&&c.Hs!=null?c.Hs.toFixed(2):"",
+      c&&c.T!=null?Math.round(c.T):"", c&&c.dir!=null?Math.round(c.dir):"",
+      c&&c.wind!=null?Math.round(c.wind):"", c&&c.wdir!=null?Math.round(c.wdir):"",
+      c?["offshore","cross-off","cross-on","onshore"][c.wcat]:"",
+      c&&c.gust!=null?Math.round(c.gust):"", c&&c.tideLevel!=null?Math.round(c.tideLevel*100):"",
+      c&&c.coef!=null?c.coef:"", c&&c.sst!=null?Math.round(c.sst):"", c&&c.air!=null?Math.round(c.air):"",
+      c?(c.fail||"ok"):""].join(";"));
+  });
+  var txt=lines.join("\n");
+  try{
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob(["\ufeff"+txt],{type:"text/csv;charset=utf-8"}));
+    a.download="houle-"+dayOf(ti)+".csv";a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+    toast("CSV téléchargé");
+  }catch(e){
+    if(navigator.clipboard)navigator.clipboard.writeText(txt).then(function(){toast("CSV copié");},function(){toast("Export impossible");});
+  }
+}
+
+// ================= ONGLET 4 : METHODE =================
+var docDone=false;
+function renderDoc(){
+  if(docDone)return;
+  var H=window.HELP||{},box=$("docBody");
+  var h='<div class="doc">';
+  h+='<p class="docintro">Tout ce que la page calcule, et comment. Rien n\u2019est une bo\u00eete noire : si un r\u00e9sultat te para\u00eet faux, tu dois pouvoir retrouver pourquoi.</p>';
+
+  h+='<nav class="docnav">';
+  (H.METHOD||[]).forEach(function(sec,k){h+='<a href="#doc-'+k+'">'+sec.h+'</a>';});
+  h+='<a href="#doc-metrics">Les métriques une par une</a><a href="#doc-gloss">Glossaire</a></nav>';
+
+  (H.METHOD||[]).forEach(function(sec,k){
+    h+='<section class="docsec" id="doc-'+k+'"><h3>'+sec.h+'</h3>';
+    sec.p.forEach(function(par){h+='<p>'+par+'</p>';});
+    h+='</section>';
+  });
+
+  h+='<section class="docsec" id="doc-metrics"><h3>Les métriques une par une</h3>';
+  var T=H.TIPS||{};
+  Object.keys(T).forEach(function(k){
+    h+='<div class="metric"><h4>'+T[k].t+'</h4><p>'+T[k].d+'</p></div>';
+  });
+  h+='</section>';
+
+  h+='<section class="docsec" id="doc-gloss"><h3>Glossaire</h3><dl class="gloss">';
+  (H.GLOSSARY||[]).forEach(function(g){h+='<dt>'+g[0]+'</dt><dd>'+g[1]+'</dd>';});
+  h+='</dl></section>';
+
+  h+='<section class="docsec"><h3>Les réglages des 59 spots</h3>'+
+     '<p>Le carnet complet, tel qu\u2019il est utilis\u00e9 par le calcul. Ces valeurs vivent dans un fichier \u00e0 part et sont corrigeables une par une.</p>'+
+     '<div class="tablewrap"><table class="dtable"><thead><tr><th>Spot</th><th>Secteur</th><th>Orient.</th><th>Fenêtre</th><th>Abri</th><th>Pér. min</th><th>Marée</th><th>Taille utile</th></tr></thead><tbody>';
+  S.forEach(function(sp){
+    h+='<tr><td class="tname">'+sp.name+(sp.shore?' <span class="pill">shore</span>':'')+'</td>'+
+      '<td class="muted small">'+ZONES[sp.zone]+'</td>'+
+      '<td class="num">'+sp.orient+'°</td><td class="num">'+sp.win[0]+'–'+sp.win[1]+'°</td>'+
+      '<td class="num">'+sp.shelter+'</td><td class="num">'+sp.perMin+' s</td>'+
+      '<td class="muted small">'+TIDE_LABEL[sp.tide]+'</td>'+
+      '<td class="num">'+nf(sp.size[0])+'–'+nf(sp.size[1])+' m</td></tr>';
+  });
+  h+='</tbody></table></div></section>';
+
+  h+='<section class="docsec"><h3>Sources et limites juridiques</h3>'+
+     '<p>Les pr\u00e9visions viennent d\u2019<a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a>, sous licence CC BY 4.0, en usage non commercial. Les mod\u00e8les sous-jacents sont ceux de l\u2019ECMWF et de M\u00e9t\u00e9o-France, entre autres.</p>'+
+     '<p>Cette page n\u2019est pas un service de s\u00e9curit\u00e9 en mer. Pour la navigation et les avis de temp\u00eate, la r\u00e9f\u00e9rence reste M\u00e9t\u00e9o-France Marine et le SHOM pour les mar\u00e9es officielles.</p></section>';
+
+  h+='</div>';
+  box.innerHTML=h;
+  docDone=true;
+}
+
 // ---------- chrome ----------
 function renderChips(){
   [["f0",0],["f2",2],["f3",3]].forEach(function(x){$(x[0]).setAttribute("aria-pressed",minStars===x[1]?"true":"false");});
@@ -857,7 +1195,11 @@ function stamp(){
   });
 }
 function render(){
-  renderVerdict();renderDays();renderStrip();renderClock();renderChips();renderMarkers();renderRank();renderPanel();renderSessions();writeURL();
+  renderVerdict();renderDays();
+  if(tabNow==="go")renderGo();
+  else if(tabNow==="map"){renderStrip();renderClock();renderChips();renderMarkers();renderRank();renderPanel();renderSessions();}
+  else if(tabNow==="data")renderData();
+  writeURL();
 }
 
 // ---------- démarrage ----------
@@ -898,11 +1240,11 @@ function boot(){
     readURL();
     drawMapBase();mapGestures();wireUI();
     $("boot").hidden=true;$("app").hidden=false;
-    stamp();render();scrollStripTo(ti);
+    stamp();setTab(tabNow);render();if(tabNow==="map")scrollStripTo(ti);
     try{
       if(!localStorage.getItem("houle-vu")){
         localStorage.setItem("houle-vu","1");
-        setTimeout(openGuide,700);
+        toast("Première visite : l'onglet Méthode explique tout");
       }
     }catch(e){}
   }).catch(function(err){
@@ -919,7 +1261,9 @@ function step(n){
   ti=t;render();scrollStripTo(ti);
 }
 function wireUI(){
-  $("btnGuide").addEventListener("click",openGuide);
+  document.querySelectorAll("#tabs .tab").forEach(function(b){
+    b.addEventListener("click",function(){setTab(b.dataset.tab);});
+  });
   $("prev").addEventListener("click",function(){step(-1);});
   $("next").addEventListener("click",function(){step(1);});
   $("btnNow").addEventListener("click",function(){

@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updated": "2026-09-29",
+  "updated": "2026-09-29", "spotCount": 59,
   "note": "Carnet de spots. Une ligne par spot, modifiable a la main. orient = direction vers laquelle la plage regarde (d'ou viennent les vagues). win = arc de directions de houle qui atteint le spot. shelter = coefficient d'abri applique a la hauteur de houle du modele. perMin = periode minimale utile en secondes. tide = fenetre de maree (mi, mihaute, mibasse, bassemi, mimontante, toutes). size = hauteur de houle utile au spot, mini et maxi en metres. shore = shorebreak ou reef creux, bonifie en bodyboard.",
   "zones": [
     "Côte nord du Léon",
@@ -31,6 +31,8 @@
 {"name":"Le Trez Hir","lat":48.345,"lon":-4.705,"orient":250,"win":[240,290],"shelter":0.35,"perMin":11,"tide":"mi","size":[1.8,4.5],"shore":false,"zone":1,"note":"Ne réveille que sur grosse houle d'ouest"},
 {"name":"Porsmilin","lat":48.345,"lon":-4.655,"orient":230,"win":[240,290],"shelter":0.35,"perMin":11,"tide":"toutes","size":[1.5,4.0],"shore":false,"zone":1,"note":"Refuge gros temps, petit mais propre"},
 {"name":"Trégana","lat":48.360,"lon":-4.640,"orient":240,"win":[240,290],"shelter":0.30,"perMin":12,"tide":"mihaute","size":[2.0,4.5],"shore":false,"zone":1,"note":"Encore plus filtré que Porsmilin"},
+{"name":"Dalbosc","lat":48.342,"lon":-4.629,"orient":250,"win":[225,300],"shelter":0.88,"perMin":9,"tide":"mibasse","size":[0.8,2.8],"shore":false,"zone":1,"note":"Reef de Locmaria-Plouzané, orienté ouest-sud-ouest : capte très bien, le plus réceptif du secteur"},
+{"name":"Le Petit Minou","lat":48.3355,"lon":-4.6135,"orient":235,"win":[235,295],"shelter":0.70,"perMin":10,"tide":"mihaute","size":[1.0,3.0],"shore":false,"zone":1,"note":"Sous le phare, à l'entrée du goulet : marche sur houle normale"},
 {"name":"Pen Hat","lat":48.278,"lon":-4.615,"orient":280,"win":[250,330],"shelter":1.10,"perMin":10,"tide":"mibasse","size":[0.8,3.0],"shore":false,"zone":2,"note":"Lourd, courants marqués"},
 {"name":"Kerloc'h","lat":48.245,"lon":-4.560,"orient":265,"win":[235,320],"shelter":1.00,"perMin":9,"tide":"mi","size":[0.8,2.8],"shore":false,"zone":2,"note":"Bancs puissants, moins fréquenté"},
 {"name":"Anse de Dinan","lat":48.225,"lon":-4.575,"orient":260,"win":[240,310],"shelter":0.75,"perMin":10,"tide":"mihaute","size":[1.2,3.5],"shore":false,"zone":2,"note":"Abrité par la pointe, bon gros jour"},
